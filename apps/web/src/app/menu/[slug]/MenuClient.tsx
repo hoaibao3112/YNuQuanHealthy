@@ -35,8 +35,18 @@ export default function MenuClient({
   }, [items])
 
   const filtered = useMemo(() => {
-    if (activeCategory === 'all') return items
-    return items.filter((i) => i.category === activeCategory)
+    const categoryOrder = ['Món ăn healthy', 'Món ăn vặt', 'Nước uống']
+    const sorted = [...items].sort((a, b) => {
+      const idxA = categoryOrder.indexOf(a.category)
+      const idxB = categoryOrder.indexOf(b.category)
+      if (idxA === -1 && idxB === -1) return a.category.localeCompare(b.category)
+      if (idxA === -1) return 1
+      if (idxB === -1) return -1
+      return idxA - idxB
+    })
+
+    if (activeCategory === 'all') return sorted
+    return sorted.filter((i) => i.category === activeCategory)
   }, [items, activeCategory])
 
   const totalQty = cart.reduce((s, i) => s + i.quantity, 0)
