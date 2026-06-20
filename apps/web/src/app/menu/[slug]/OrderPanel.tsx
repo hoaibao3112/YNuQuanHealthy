@@ -11,11 +11,12 @@ interface Props {
   onAdd: (item: MenuItem) => void
   onRemove: (id: string) => void
   onClear: () => void
+  onClose?: () => void
 }
 
 type Step = 'cart' | 'form' | 'success'
 
-export default function OrderPanel({ cart, slug, onAdd, onRemove, onClear }: Props) {
+export default function OrderPanel({ cart, slug, onAdd, onRemove, onClear, onClose }: Props) {
   const [step, setStep] = useState<Step>('cart')
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
@@ -90,12 +91,22 @@ export default function OrderPanel({ cart, slug, onAdd, onRemove, onClear }: Pro
   if (step === 'cart') {
     return (
       <div className="flex flex-col h-full bg-white text-slate-800">
-        <div className="px-5 py-4.5 border-b border-sky-50">
-          <h2 className="text-slate-850 font-extrabold text-lg flex items-center gap-2">
-            <span>🛒 Đơn hàng của bạn</span>
-          </h2>
-          {cart.length === 0 && (
-            <p className="text-slate-400 text-xs mt-1">Chưa có món nào được chọn</p>
+        <div className="px-5 py-4.5 border-b border-sky-50 flex items-center justify-between">
+          <div>
+            <h2 className="text-slate-855 font-extrabold text-lg flex items-center gap-2">
+              <span>🛒 Đơn hàng của bạn</span>
+            </h2>
+            {cart.length === 0 && (
+              <p className="text-slate-400 text-xs mt-1">Chưa có món nào được chọn</p>
+            )}
+          </div>
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="size-8 bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 rounded-full flex items-center justify-center text-xl font-bold cursor-pointer transition-colors"
+            >
+              ×
+            </button>
           )}
         </div>
 
@@ -169,14 +180,24 @@ export default function OrderPanel({ cart, slug, onAdd, onRemove, onClear }: Pro
   if (step === 'form') {
     return (
       <div className="flex flex-col h-full bg-white text-slate-800">
-        <div className="px-5 py-4 border-b border-sky-50 flex items-center gap-3">
-          <button
-            onClick={() => setStep('cart')}
-            className="size-8 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-650 hover:text-slate-800 text-xl font-bold transition-colors flex items-center justify-center cursor-pointer"
-          >
-            ←
-          </button>
-          <h2 className="text-slate-800 font-extrabold text-lg">Thông tin đặt hàng</h2>
+        <div className="px-5 py-4 border-b border-sky-50 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setStep('cart')}
+              className="size-8 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-650 hover:text-slate-800 text-xl font-bold transition-colors flex items-center justify-center cursor-pointer"
+            >
+              ←
+            </button>
+            <h2 className="text-slate-800 font-extrabold text-lg">Thông tin đặt hàng</h2>
+          </div>
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="size-8 bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 rounded-full flex items-center justify-center text-xl font-bold cursor-pointer transition-colors"
+            >
+              ×
+            </button>
+          )}
         </div>
 
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
@@ -317,7 +338,15 @@ export default function OrderPanel({ cart, slug, onAdd, onRemove, onClear }: Pro
 
   // ===== BƯỚC 3: THÀNH CÔNG =====
   return (
-    <div className="flex flex-col items-center justify-center h-full px-6 text-center gap-5 bg-white text-slate-800 py-10">
+    <div className="flex flex-col items-center justify-center h-full px-6 text-center gap-5 bg-white text-slate-800 py-10 relative">
+      {onClose && (
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 size-8 bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 rounded-full flex items-center justify-center text-xl font-bold cursor-pointer transition-colors"
+        >
+          ×
+        </button>
+      )}
       <div className="text-6xl animate-bounce">🎉</div>
       <div>
         <h2 className="text-slate-800 font-black text-xl">Đặt hàng thành công!</h2>

@@ -231,18 +231,7 @@ export default function MenuClient({
       {/* Mobile: Order Panel dạng bottom sheet */}
       {showOrderPanel && (
         <div className="lg:hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex flex-col justify-end">
-          <div className="bg-white rounded-t-[2.5rem] max-h-[92vh] flex flex-col shadow-2xl">
-            <div className="flex items-center justify-between px-6 py-4.5 border-b border-sky-50/80">
-              <h2 className="text-slate-800 font-extrabold text-lg flex items-center gap-2">
-                <span>🛒 Đơn hàng của bạn</span>
-              </h2>
-              <button
-                onClick={() => setShowOrderPanel(false)}
-                className="size-8 bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 rounded-full flex items-center justify-center text-xl font-bold cursor-pointer transition-colors"
-              >
-                ×
-              </button>
-            </div>
+          <div className="bg-white rounded-t-[2.5rem] max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
             <div className="flex-1 overflow-y-auto">
               <OrderPanel
                 cart={cart}
@@ -253,6 +242,7 @@ export default function MenuClient({
                   setCart([])
                   setShowOrderPanel(false)
                 }}
+                onClose={() => setShowOrderPanel(false)}
               />
             </div>
           </div>
