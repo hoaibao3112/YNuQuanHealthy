@@ -119,12 +119,12 @@ export default function OrderPanel({ cart, slug, onAdd, onRemove, onClear, onClo
             </div>
           ) : (
             cart.map((item) => (
-              <div key={item.id} className="flex items-center gap-3 bg-orange-50/10 p-2 rounded-2xl border border-orange-100/10 hover:border-orange-100/40 transition-colors">
+              <div key={item.id} className="flex items-center gap-3 bg-blue-50/10 p-2 rounded-2xl border border-blue-100/10 hover:border-blue-100/40 transition-colors">
                 {item.image_url && (
                   <img
                     src={item.image_url}
                     alt={item.name}
-                    className="w-14 h-14 rounded-xl object-cover flex-shrink-0 border border-orange-100/20"
+                    className="w-14 h-14 rounded-xl object-cover flex-shrink-0 border border-blue-100/20"
                   />
                 )}
                 <div className="flex-1 min-w-0">
@@ -133,19 +133,19 @@ export default function OrderPanel({ cart, slug, onAdd, onRemove, onClear, onClo
                     {(item.price * item.quantity).toLocaleString('vi-VN')}đ
                   </p>
                 </div>
-                <div className="flex items-center gap-0.5 bg-orange-50 border border-orange-200/50 rounded-xl overflow-hidden flex-shrink-0">
+                <div className="flex items-center gap-0.5 bg-blue-50 border border-blue-200/50 rounded-xl overflow-hidden flex-shrink-0">
                   <button
                     onClick={() => onRemove(item.id)}
-                    className="w-8 h-8 text-orange-950 font-bold hover:bg-orange-100/50 transition-colors cursor-pointer"
+                    className="w-8 h-8 text-blue-950 font-bold hover:bg-blue-100/50 transition-colors cursor-pointer"
                   >
                     −
                   </button>
-                  <span className="text-orange-950 text-xs font-black w-5 text-center">
+                  <span className="text-blue-950 text-xs font-black w-5 text-center">
                     {item.quantity}
                   </span>
                   <button
                     onClick={() => onAdd(item)}
-                    className="w-8 h-8 text-orange-950 font-bold hover:bg-orange-100/50 transition-colors cursor-pointer"
+                    className="w-8 h-8 text-blue-950 font-bold hover:bg-blue-100/50 transition-colors cursor-pointer"
                   >
                     +
                   </button>
@@ -157,16 +157,16 @@ export default function OrderPanel({ cart, slug, onAdd, onRemove, onClear, onClo
 
         {/* Tổng tiền + nút đặt */}
         {cart.length > 0 && (
-          <div className="px-5 py-4.5 border-t border-orange-50 bg-orange-50/10 space-y-3.5">
+          <div className="px-5 py-4.5 border-t border-blue-50 bg-blue-50/10 space-y-3.5">
             <div className="flex justify-between items-center">
               <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">{totalQty} món</span>
-              <span className="text-rose-600 font-black text-xl">
+              <span className="text-rose-650 font-black text-xl">
                 {total.toLocaleString('vi-VN')}đ
               </span>
             </div>
             <button
               onClick={() => setStep('form')}
-              className="w-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white py-3.5 rounded-2xl font-bold text-base transition-all duration-300 shadow-md shadow-orange-500/10 cursor-pointer"
+              className="w-full bg-gradient-to-r from-[#01007f] to-[#120fad] hover:from-[#00008b] hover:to-[#02008f] text-white py-3.5 rounded-2xl font-bold text-base transition-all duration-300 shadow-md shadow-blue-500/10 cursor-pointer"
             >
               Đặt hàng ngay →
             </button>
@@ -180,7 +180,7 @@ export default function OrderPanel({ cart, slug, onAdd, onRemove, onClear, onClo
   if (step === 'form') {
     return (
       <div className="flex flex-col h-full bg-white text-slate-800">
-        <div className="px-5 py-4 border-b border-orange-50 flex items-center justify-between">
+        <div className="px-5 py-4 border-b border-blue-50 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setStep('cart')}
@@ -202,7 +202,7 @@ export default function OrderPanel({ cart, slug, onAdd, onRemove, onClear, onClo
 
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
           {/* Tóm tắt đơn */}
-          <div className="bg-orange-50/10 border border-orange-100/50 rounded-3xl p-4.5 space-y-2">
+          <div className="bg-blue-50/10 border border-blue-100/50 rounded-3xl p-4.5 space-y-2">
             {cart.map((item) => (
               <div key={item.id} className="flex justify-between text-xs font-semibold">
                 <span className="text-slate-600">
@@ -213,7 +213,7 @@ export default function OrderPanel({ cart, slug, onAdd, onRemove, onClear, onClo
                 </span>
               </div>
             ))}
-            <div className="border-t border-orange-100/40 pt-2.5 flex justify-between items-center">
+            <div className="border-t border-blue-100/40 pt-2.5 flex justify-between items-center">
               <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Tổng cộng</span>
               <span className="text-rose-600 font-black text-lg">
                 {total.toLocaleString('vi-VN')}đ
@@ -231,7 +231,7 @@ export default function OrderPanel({ cart, slug, onAdd, onRemove, onClear, onClo
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Nguyễn Văn A"
-              className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-4 py-3 text-sm placeholder-slate-400 focus:outline-none focus:border-orange-400 focus:bg-white transition-all duration-200"
+              className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-4 py-3 text-sm placeholder-slate-400 focus:outline-none focus:border-blue-400 focus:bg-white transition-all duration-200"
             />
           </div>
 
@@ -245,7 +245,7 @@ export default function OrderPanel({ cart, slug, onAdd, onRemove, onClear, onClo
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="0901 234 567"
-              className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-4 py-3 text-sm placeholder-slate-400 focus:outline-none focus:border-orange-400 focus:bg-white transition-all duration-200"
+              className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-4 py-3 text-sm placeholder-slate-400 focus:outline-none focus:border-blue-400 focus:bg-white transition-all duration-200"
             />
           </div>
 
@@ -257,7 +257,7 @@ export default function OrderPanel({ cart, slug, onAdd, onRemove, onClear, onClo
             <select
               value={district}
               onChange={(e) => handleDistrictChange(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-400 focus:bg-white transition-all duration-200 cursor-pointer"
+              className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-400 focus:bg-white transition-all duration-200 cursor-pointer"
             >
               <option value="">-- Chọn Quận/Huyện --</option>
               {tienGiangData.map((d) => (
@@ -277,7 +277,7 @@ export default function OrderPanel({ cart, slug, onAdd, onRemove, onClear, onClo
               value={ward}
               onChange={(e) => setWard(e.target.value)}
               disabled={!district}
-              className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-400 focus:bg-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-400 focus:bg-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               <option value="">-- Chọn Phường/Xã --</option>
               {wardsList.map((w) => (
@@ -298,7 +298,7 @@ export default function OrderPanel({ cart, slug, onAdd, onRemove, onClear, onClo
               value={street}
               onChange={(e) => setStreet(e.target.value)}
               placeholder="Ví dụ: 123 Lê Lợi"
-              className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-4 py-3 text-sm placeholder-slate-400 focus:outline-none focus:border-orange-400 focus:bg-white transition-all duration-200"
+              className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-4 py-3 text-sm placeholder-slate-400 focus:outline-none focus:border-blue-400 focus:bg-white transition-all duration-200"
             />
           </div>
 
@@ -312,7 +312,7 @@ export default function OrderPanel({ cart, slug, onAdd, onRemove, onClear, onClo
               onChange={(e) => setNote(e.target.value)}
               placeholder="Ít cay, không hành, dị ứng..."
               rows={3}
-              className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-4 py-3 text-sm placeholder-slate-400 focus:outline-none focus:border-orange-400 focus:bg-white transition-all duration-200 resize-none"
+              className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-4 py-3 text-sm placeholder-slate-400 focus:outline-none focus:border-blue-400 focus:bg-white transition-all duration-200 resize-none"
             />
           </div>
 
@@ -323,11 +323,11 @@ export default function OrderPanel({ cart, slug, onAdd, onRemove, onClear, onClo
           )}
         </div>
 
-        <div className="px-5 py-4 border-t border-orange-50 bg-orange-50/10">
+        <div className="px-5 py-4 border-t border-blue-50 bg-blue-50/10">
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="w-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 disabled:opacity-50 text-white py-3.5 rounded-2xl font-bold text-base transition-all duration-300 shadow-md shadow-orange-500/10 cursor-pointer"
+            className="w-full bg-gradient-to-r from-[#01007f] to-[#120fad] hover:from-[#00008b] hover:to-[#02008f] disabled:opacity-50 text-white py-3.5 rounded-2xl font-bold text-base transition-all duration-300 shadow-md shadow-blue-500/10 cursor-pointer"
           >
             {loading ? 'Đang gửi đơn...' : `Xác nhận đặt hàng · ${total.toLocaleString('vi-VN')}đ`}
           </button>
@@ -351,7 +351,7 @@ export default function OrderPanel({ cart, slug, onAdd, onRemove, onClear, onClo
       <div>
         <h2 className="text-slate-800 font-black text-xl">Đặt hàng thành công!</h2>
         <p className="text-slate-450 text-sm mt-1.5">
-          Mã đơn: <span className="text-orange-600 font-extrabold">{orderCode}</span>
+          Mã đơn: <span className="text-blue-650 font-extrabold">{orderCode}</span>
         </p>
       </div>
       <p className="text-slate-500 text-xs leading-relaxed max-w-xs">
@@ -367,7 +367,7 @@ export default function OrderPanel({ cart, slug, onAdd, onRemove, onClear, onClo
       </a>
       <button
         onClick={() => setStep('cart')}
-        className="text-orange-600 text-xs font-bold underline hover:text-orange-700 transition-colors cursor-pointer"
+        className="text-blue-650 text-xs font-bold underline hover:text-blue-700 transition-colors cursor-pointer"
       >
         Đặt thêm món khác
       </button>

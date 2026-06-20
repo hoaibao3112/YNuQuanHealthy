@@ -69,7 +69,7 @@ export default function MenuClient({
   }
 
   return (
-    <div className="min-h-screen bg-[#F4F7FA] text-slate-800">
+    <div className="min-h-screen bg-[#FFF2E6] text-slate-800">
       {/* Desktop: 2 cột | Mobile: 1 cột */}
       <div className="flex flex-col lg:flex-row min-h-screen">
 
@@ -77,9 +77,12 @@ export default function MenuClient({
         <div className="flex-1 lg:max-w-[65%] flex flex-col">
 
           {/* Header */}
-          <div className="flex flex-col items-center justify-center py-6 px-4 border-b border-blue-900/20 bg-gradient-to-r from-[#01007f] to-[#120fad] text-white shadow-md">
+          <div className="flex flex-col items-center justify-center py-6 px-4 border-b border-orange-600/20 bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-md">
             <div className="relative flex flex-col items-center">
-              <span className="text-[10px] font-extrabold tracking-[0.25em] uppercase text-blue-200/90 mb-1.5 select-none">
+              <span 
+                className="text-[10px] font-extrabold tracking-[0.25em] uppercase text-[#01007f] mb-1.5 select-none"
+                style={{ textShadow: '-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff' }}
+              >
                 Link Menu
               </span>
               <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight flex items-center justify-center">
@@ -94,19 +97,22 @@ export default function MenuClient({
                 </div>
               </h1>
             </div>
-            <p className="text-blue-100/90 text-[10px] md:text-xs font-bold tracking-wider uppercase mt-2">
+            <p 
+              className="text-[#01007f] text-[10px] md:text-xs font-extrabold tracking-wider uppercase mt-2"
+              style={{ textShadow: '-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff' }}
+            >
               Món ăn healthy - món ăn vặt - nước uống
             </p>
           </div>
 
           {/* Tab categories */}
-          <div className="flex gap-2.5 px-4 py-3.5 overflow-x-auto scrollbar-hide bg-white border-b border-orange-100/40 sticky top-0 z-20">
+          <div className="flex gap-2.5 px-4 py-3.5 overflow-x-auto scrollbar-hide bg-[#FFF2E6] border-b border-blue-100/40 sticky top-0 z-20">
             <button
               onClick={() => setActiveCategory('all')}
               className={`flex-shrink-0 px-5 py-2 rounded-full text-xs font-bold transition-all duration-300 ${
                 activeCategory === 'all'
-                  ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-md shadow-orange-500/20 scale-105'
-                  : 'bg-orange-50/30 text-orange-950/70 border border-orange-100/40 hover:bg-orange-50/80'
+                  ? 'bg-gradient-to-r from-[#01007f] to-[#120fad] text-white shadow-md shadow-blue-500/20 scale-105'
+                  : 'bg-blue-50/30 text-blue-950/70 border border-blue-100/40 hover:bg-blue-50/80'
               }`}
             >
               Tất cả
@@ -117,8 +123,8 @@ export default function MenuClient({
                 onClick={() => setActiveCategory(cat)}
                 className={`flex-shrink-0 px-5 py-2 rounded-full text-xs font-bold transition-all duration-300 ${
                   activeCategory === cat
-                    ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-md shadow-orange-500/20 scale-105'
-                    : 'bg-orange-50/30 text-orange-950/70 border border-orange-100/40 hover:bg-orange-50/80'
+                    ? 'bg-gradient-to-r from-[#01007f] to-[#120fad] text-white shadow-md shadow-blue-500/20 scale-105'
+                    : 'bg-blue-50/30 text-blue-950/70 border border-blue-100/40 hover:bg-blue-50/80'
                 }`}
               >
                 {cat}
@@ -134,10 +140,10 @@ export default function MenuClient({
                 return (
                   <div
                     key={item.id}
-                    className="bg-white rounded-xl sm:rounded-3xl overflow-hidden shadow-[0_4px_20px_-4px_rgba(232,93,36,0.06)] hover:shadow-[0_10px_30px_-6px_rgba(232,93,36,0.12)] border border-orange-100/20 hover:border-orange-200/40 transition-all duration-300 transform hover:-translate-y-1 flex flex-col group"
+                    className="bg-white rounded-xl sm:rounded-3xl overflow-hidden shadow-[0_4px_20px_-4px_rgba(1,0,127,0.06)] hover:shadow-[0_10px_30px_-6px_rgba(1,0,127,0.12)] border border-blue-100/20 hover:border-blue-200/40 transition-all duration-300 transform hover:-translate-y-1 flex flex-col group"
                   >
                     {/* Ảnh món */}
-                    <div className="relative aspect-[4/3] bg-orange-50/10 overflow-hidden">
+                    <div className="relative aspect-[4/3] bg-blue-50/10 overflow-hidden">
                       {item.image_url ? (
                         <Image
                           src={item.image_url}
@@ -148,12 +154,12 @@ export default function MenuClient({
                           priority={index < 6}
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-2xl bg-orange-50/30 select-none">
+                        <div className="w-full h-full flex items-center justify-center text-2xl bg-blue-50/30 select-none">
                           🥗
                         </div>
                       )}
                       {/* Badge category - hidden on mobile for cleaner look in 4 columns */}
-                      <span className="hidden sm:inline-block absolute top-2 left-2 bg-orange-100/80 text-orange-850 text-[10px] font-bold px-2.5 py-0.5 rounded-full backdrop-blur-xs select-none shadow-xs border border-orange-200/20">
+                      <span className="hidden sm:inline-block absolute top-2 left-2 bg-blue-100/80 text-blue-850 text-[10px] font-bold px-2.5 py-0.5 rounded-full backdrop-blur-xs select-none shadow-xs border border-blue-200/20">
                         {item.category}
                       </span>
                     </div>
@@ -177,22 +183,22 @@ export default function MenuClient({
                         {qty === 0 ? (
                           <button
                             onClick={() => addToCart(item)}
-                            className="w-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white text-[10px] sm:text-xs font-extrabold py-1.5 sm:py-2.5 rounded-lg sm:rounded-xl transition-all duration-300 shadow-sm shadow-orange-500/10 cursor-pointer"
+                            className="w-full bg-gradient-to-r from-[#01007f] to-[#120fad] hover:from-[#00008b] hover:to-[#02008f] text-white text-[10px] sm:text-xs font-extrabold py-1.5 sm:py-2.5 rounded-lg sm:rounded-xl transition-all duration-300 shadow-sm shadow-blue-500/10 cursor-pointer"
                           >
                             + Chọn
                           </button>
                         ) : (
-                          <div className="flex items-center justify-between bg-orange-50/60 border border-orange-200/40 rounded-lg sm:rounded-xl overflow-hidden shadow-xs">
+                          <div className="flex items-center justify-between bg-blue-50/60 border border-blue-200/40 rounded-lg sm:rounded-xl overflow-hidden shadow-xs">
                             <button
                               onClick={() => removeFromCart(item.id)}
-                              className="w-6 sm:w-10 h-7 sm:h-9 text-orange-950 text-xs sm:text-lg font-bold hover:bg-orange-100/50 transition-colors cursor-pointer flex items-center justify-center"
+                              className="w-6 sm:w-10 h-7 sm:h-9 text-blue-950 text-xs sm:text-lg font-bold hover:bg-blue-100/50 transition-colors cursor-pointer flex items-center justify-center"
                             >
                               −
                             </button>
-                            <span className="text-orange-950 font-extrabold text-xs sm:text-sm">{qty}</span>
+                            <span className="text-blue-950 font-extrabold text-xs sm:text-sm">{qty}</span>
                             <button
                               onClick={() => addToCart(item)}
-                              className="w-6 sm:w-10 h-7 sm:h-9 text-orange-950 text-xs sm:text-lg font-bold hover:bg-orange-100/50 transition-colors cursor-pointer flex items-center justify-center"
+                              className="w-6 sm:w-10 h-7 sm:h-9 text-blue-950 text-xs sm:text-lg font-bold hover:bg-blue-100/50 transition-colors cursor-pointer flex items-center justify-center"
                             >
                               +
                             </button>
@@ -209,10 +215,10 @@ export default function MenuClient({
 
           {/* Mobile: nút xem giỏ hàng cố định dưới */}
           {totalQty > 0 && (
-            <div className="lg:hidden sticky bottom-0 p-4 bg-white/90 backdrop-blur-md border-t border-orange-100 shadow-lg">
+            <div className="lg:hidden sticky bottom-0 p-4 bg-[#FFF2E6]/90 backdrop-blur-md border-t border-blue-100 shadow-lg">
               <button
                 onClick={() => setShowOrderPanel(true)}
-                className="w-full bg-gradient-to-r from-orange-500 to-amber-600 text-white py-3.5 rounded-2xl font-bold text-base flex items-center justify-between px-5 shadow-lg shadow-orange-500/20 active:scale-[0.98] transition-transform"
+                className="w-full bg-gradient-to-r from-[#01007f] to-[#120fad] text-white py-3.5 rounded-2xl font-bold text-base flex items-center justify-between px-5 shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-transform"
               >
                 <span className="bg-white/20 text-white text-xs font-bold px-2.5 py-1 rounded-full">
                   {totalQty} món
