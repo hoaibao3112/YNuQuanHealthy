@@ -21,7 +21,10 @@ export class OrderService {
     )
 
     // Ghép địa chỉ chi tiết
-    const fullAddress = `${dto.address_street ? dto.address_street + ', ' : ''}${dto.address_ward}, ${dto.address_district}, Tiền Giang`
+    const isPickup = dto.address_district === 'Tới quán lấy' || dto.address_ward === 'Tới quán lấy'
+    const fullAddress = isPickup
+      ? 'Khách tự tới quán lấy (Không giao hàng)'
+      : `${dto.address_street ? dto.address_street + ', ' : ''}${dto.address_ward}, ${dto.address_district}, Tiền Giang`
     const noteWithAddress = `[Địa chỉ: ${fullAddress}]${dto.note ? ' - Ghi chú: ' + dto.note : ''}`
 
     // 3. Lưu vào Supabase
@@ -83,7 +86,10 @@ export class OrderService {
       )
       .join('\n')
 
-    const fullAddress = `${dto.address_street ? dto.address_street + ', ' : ''}${dto.address_ward}, ${dto.address_district}, Tiền Giang`
+    const isPickup = dto.address_district === 'Tới quán lấy' || dto.address_ward === 'Tới quán lấy'
+    const fullAddress = isPickup
+      ? 'Khách tự tới quán lấy (Không giao hàng)'
+      : `${dto.address_street ? dto.address_street + ', ' : ''}${dto.address_ward}, ${dto.address_district}, Tiền Giang`
 
     const message =
       `🔔 Y NÙ QUÁN - ĐƠN HÀNG MỚI 🔔\n\n` +
@@ -132,7 +138,10 @@ export class OrderService {
     const phoneEscaped = escapeHtml(dto.customer_phone)
     const noteEscaped = dto.note ? escapeHtml(dto.note) : ''
     
-    const fullAddress = `${dto.address_street ? dto.address_street + ', ' : ''}${dto.address_ward}, ${dto.address_district}, Tiền Giang`
+    const isPickup = dto.address_district === 'Tới quán lấy' || dto.address_ward === 'Tới quán lấy'
+    const fullAddress = isPickup
+      ? 'Khách tự tới quán lấy (Không giao hàng)'
+      : `${dto.address_street ? dto.address_street + ', ' : ''}${dto.address_ward}, ${dto.address_district}, Tiền Giang`
     const addressEscaped = escapeHtml(fullAddress)
 
     const itemsList = dto.items

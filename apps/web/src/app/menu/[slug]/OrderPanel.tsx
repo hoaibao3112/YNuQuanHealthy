@@ -27,6 +27,7 @@ export default function OrderPanel({ cart, slug, onAdd, onRemove, onClear, onClo
   const [messengerUrl, setMessengerUrl] = useState('')
   const [error, setError] = useState('')
 
+  const [deliveryMethod, setDeliveryMethod] = useState<'ship' | 'pickup'>('ship')
   const [district, setDistrict] = useState('')
   const [ward, setWard] = useState('')
   const [street, setStreet] = useState('')
@@ -61,57 +62,55 @@ export default function OrderPanel({ cart, slug, onAdd, onRemove, onClear, onClo
   }
 
   async function handleSubmit() {
-    if (!name.trim() || !phone.trim()) {
-      setError('Vui lòng nhập tên và số điện thoại')
-      return
-    }
-    if (!district || !ward) {
-      setError('Vui lòng chọn Quận/Huyện và Phường/Xã ở Tiền Giang')
-      return
-    }
-    setError('')
-    setLoading(true)
-    try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/orders`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            shop_slug: slug,
-            customer_name: name.trim(),
-            customer_phone: phone.trim(),
-            note: note.trim(),
-            address_district: district,
-            address_ward: ward,
-            address_street: street.trim(),
-            items: cart.map((c) => ({
-              menu_item_id: c.id,
-              name: c.name,
-              price: c.price,
-              quantity: c.quantity,
-            })),
-          }),
-        }
-      )
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.message || 'Lỗi đặt hàng')
-      setOrderCode(data.order_code)
-      setMessengerUrl(data.messenger_url)
-
-      // Save customer details to localStorage
-      try {
-        localStorage.setItem('ynq_customer_name', name.trim())
-        localStorage.setItem('ynq_customer_phone', phone.trim())
-        localStorage.setItem('ynq_customer_district', district)
-        localStorage.setItem('ynq_customer_ward', ward)
-        localStorage.setItem('ynq_customer_street', street.trim())
-      } catch (e) {
-        console.error('Error saving customer details to localStorage', e)
+      if (deliveryMethod === 'ship' && (!district || !ward)) {
+        setError('Vui lòng chọn Quận/Huyện và Phường/Xã ở Tiền Giang')
+        return
       }
-
-      setStep('success')
-      onClear()
+      setError('')
+      setLoading(true)
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/orders`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              shop_slug: slug,
+              customer_name: name.trim(),
+              customer_phone: phone.trim(),
+              note: note.trim(),
+              address_district: deliveryMethod === 'ship' ? district : 'Tới quán lấy',
+              address_ward: deliveryMethod === 'ship' ? ward : 'Tới quán lấy',
+              address_street: deliveryMethod === 'ship' ? street.trim() : '',
+              items: cart.map((c) => ({
+                menu_item_id: c.id,
+                name: c.name,
+                price: c.price,
+                quantity: c.quantity,
+              })),
+            }),
+          }
+        )
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.message || 'Lỗi đặt hàng')
+        setOrderCode(data.order_code)
+        setMessengerUrl(data.messenger_url)
+  
+        // Save customer details to localStorage
+        try {
+          localStorage.setItem('ynq_customer_name', name.trim())
+          localStorage.setItem('ynq_customer_phone', phone.trim())
+          if (deliveryMethod === 'ship') {
+            localStorage.setItem('ynq_customer_district', district)
+            localStorage.setItem('ynq_customer_ward', ward)
+            localStorage.setItem('ynq_customer_street', street.trim())
+          }
+        } catch (e) {
+          console.error('Error saving customer details to localStorage', e)
+        }
+  
+        setStep('success')
+        onClear()
     } catch (err: any) {
       setError(err.message || 'Có lỗi xảy ra, vui lòng thử lại')
     } finally {
@@ -199,6 +198,32 @@ export default function OrderPanel({ cart, slug, onAdd, onRemove, onClear, onClo
                   📍 Thông tin giao hàng
                 </h3>
 
+                {/* Nút chọn hình thức nhận hàng */}
+                <div className="flex gap-2 p-1 bg-slate-100 rounded-xl border border-slate-100/30">
+                  <button
+                    type="button"
+                    onClick={() => setDeliveryMethod('ship')}
+                    className={`flex-1 py-2 text-xs font-extrabold rounded-lg transition-all active:scale-[0.98] cursor-pointer ${
+                      deliveryMethod === 'ship'
+                        ? 'bg-[#F97316] text-white shadow-sm'
+                        : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+                    }`}
+                  >
+                    🛵 Quán đi ship
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDeliveryMethod('pickup')}
+                    className={`flex-1 py-2 text-xs font-extrabold rounded-lg transition-all active:scale-[0.98] cursor-pointer ${
+                      deliveryMethod === 'pickup'
+                        ? 'bg-[#F97316] text-white shadow-sm'
+                        : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+                    }`}
+                  >
+                    🏪 Tới quán lấy
+                  </button>
+                </div>
+
                 {/* Input tên */}
                 <div>
                   <label className="text-slate-500 text-[10px] font-extrabold uppercase tracking-wider block mb-1.5">
@@ -227,58 +252,62 @@ export default function OrderPanel({ cart, slug, onAdd, onRemove, onClear, onClo
                   />
                 </div>
 
-                {/* Chọn Quận/Huyện */}
-                <div>
-                  <label className="text-slate-500 text-[10px] font-extrabold uppercase tracking-wider block mb-1.5">
-                    Quận / Huyện (Tiền Giang) *
-                  </label>
-                  <select
-                    value={district}
-                    onChange={(e) => handleDistrictChange(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-400 focus:bg-white transition-all duration-200 cursor-pointer"
-                  >
-                    <option value="">-- Chọn Quận/Huyện --</option>
-                    {tienGiangData.map((d) => (
-                      <option key={d.code} value={d.name}>
-                        {d.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                {deliveryMethod === 'ship' && (
+                  <>
+                    {/* Chọn Quận/Huyện */}
+                    <div className="animate-in fade-in slide-in-from-top-2 duration-200">
+                      <label className="text-slate-500 text-[10px] font-extrabold uppercase tracking-wider block mb-1.5">
+                        Quận / Huyện (Tiền Giang) *
+                      </label>
+                      <select
+                        value={district}
+                        onChange={(e) => handleDistrictChange(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-400 focus:bg-white transition-all duration-200 cursor-pointer"
+                      >
+                        <option value="">-- Chọn Quận/Huyện --</option>
+                        {tienGiangData.map((d) => (
+                          <option key={d.code} value={d.name}>
+                            {d.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
 
-                {/* Chọn Phường/Xã */}
-                <div>
-                  <label className="text-slate-500 text-[10px] font-extrabold uppercase tracking-wider block mb-1.5">
-                    Phường / Xã *
-                  </label>
-                  <select
-                    value={ward}
-                    onChange={(e) => setWard(e.target.value)}
-                    disabled={!district}
-                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-400 focus:bg-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                  >
-                    <option value="">-- Chọn Phường/Xã --</option>
-                    {wardsList.map((w) => (
-                      <option key={w} value={w}>
-                        {w}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                    {/* Chọn Phường/Xã */}
+                    <div className="animate-in fade-in slide-in-from-top-2 duration-200">
+                      <label className="text-slate-500 text-[10px] font-extrabold uppercase tracking-wider block mb-1.5">
+                        Phường / Xã *
+                      </label>
+                      <select
+                        value={ward}
+                        onChange={(e) => setWard(e.target.value)}
+                        disabled={!district}
+                        className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-400 focus:bg-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                      >
+                        <option value="">-- Chọn Phường/Xã --</option>
+                        {wardsList.map((w) => (
+                          <option key={w} value={w}>
+                            {w}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
 
-                {/* Địa chỉ chi tiết */}
-                <div>
-                  <label className="text-slate-550 text-[10px] font-extrabold uppercase tracking-wider block mb-1.5">
-                    Số nhà, tên đường (tùy chọn)
-                  </label>
-                  <input
-                    type="text"
-                    value={street}
-                    onChange={(e) => setStreet(e.target.value)}
-                    placeholder="Ví dụ: 123 Lê Lợi"
-                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-4 py-3 text-sm placeholder-slate-400 focus:outline-none focus:border-blue-400 focus:bg-white transition-all duration-200"
-                  />
-                </div>
+                    {/* Địa chỉ chi tiết */}
+                    <div className="animate-in fade-in slide-in-from-top-2 duration-200">
+                      <label className="text-slate-550 text-[10px] font-extrabold uppercase tracking-wider block mb-1.5">
+                        Số nhà, tên đường (tùy chọn)
+                      </label>
+                      <input
+                        type="text"
+                        value={street}
+                        onChange={(e) => setStreet(e.target.value)}
+                        placeholder="Ví dụ: 123 Lê Lợi"
+                        className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-4 py-3 text-sm placeholder-slate-400 focus:outline-none focus:border-blue-400 focus:bg-white transition-all duration-200"
+                      />
+                    </div>
+                  </>
+                )}
 
                 {/* Ghi chú */}
                 <div>
