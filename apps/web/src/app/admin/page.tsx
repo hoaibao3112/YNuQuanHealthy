@@ -173,6 +173,20 @@ export default function AdminPage() {
     const file = e.target.files?.[0]
     if (!file) return
 
+    // Kiểm tra định dạng HEIC/HEIF từ iOS
+    const fileExt = file.name.split('.').pop()?.toLowerCase()
+    if (fileExt === 'heic' || fileExt === 'heif') {
+      showMsg('Định dạng HEIC (iPhone) không hỗ trợ trên Web!', 'error')
+      alert(
+        'LƯU Ý QUAN TRỌNG CHO IPHONE/IPAD (iOS):\n\n' +
+        'Ảnh định dạng HEIC trực tiếp từ máy ảnh iPhone không thể hiển thị trên trang web.\n\n' +
+        'Cách khắc phục:\n' +
+        '1. Vui lòng chọn ảnh từ "Thư viện ảnh" (Photo Library) thay vì mục "Tệp" (Files) để iOS tự động chuyển đổi sang JPG trước khi tải lên.\n' +
+        '2. Hoặc chuyển đổi ảnh sang JPG/PNG trước khi tải lên.'
+      )
+      return
+    }
+
     // Kiểm tra dung lượng file (tối đa 5MB)
     if (file.size > 5 * 1024 * 1024) {
       showMsg('Dung lượng ảnh tối đa là 5MB!', 'error')
@@ -181,15 +195,25 @@ export default function AdminPage() {
 
     setUploading(true)
     try {
-      const fileExt = file.name.split('.').pop()
       const randomStr = Math.random().toString(36).substring(2, 9)
       const fileName = `${shopSlug}/${Date.now()}-${randomStr}.${fileExt}`
+
+      // Xác định Content-Type chính xác cho Supabase (đặc biệt quan trọng trên Safari/iOS)
+      let contentType = file.type
+      if (!contentType) {
+        if (fileExt === 'jpg' || fileExt === 'jpeg') contentType = 'image/jpeg'
+        else if (fileExt === 'png') contentType = 'image/png'
+        else if (fileExt === 'webp') contentType = 'image/webp'
+        else if (fileExt === 'gif') contentType = 'image/gif'
+        else contentType = 'application/octet-stream'
+      }
 
       const { data, error } = await supabase.storage
         .from('menu-images')
         .upload(fileName, file, {
           cacheControl: '3600',
-          upsert: true
+          upsert: true,
+          contentType: contentType
         })
 
       if (error) {
@@ -915,6 +939,7 @@ export default function AdminPage() {
                           </svg>
                           <span className="text-xs font-semibold text-slate-500">Chọn file ảnh hoặc Kéo thả vào đây</span>
                           <span className="text-[10px] text-slate-400">Hỗ trợ JPG, PNG, WEBP tối đa 5MB</span>
+                          <span className="text-[9px] text-amber-600 font-semibold mt-1 max-w-[280px]">💡 Lưu ý trên iPhone: Hãy chọn ảnh từ "Thư viện ảnh" để iOS tự động chuyển đổi sang JPG.</span>
                         </>
                       )}
                     </label>
