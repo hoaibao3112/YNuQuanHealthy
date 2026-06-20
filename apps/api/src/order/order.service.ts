@@ -86,14 +86,14 @@ export class OrderService {
     const fullAddress = `${dto.address_street ? dto.address_street + ', ' : ''}${dto.address_ward}, ${dto.address_district}, Tiền Giang`
 
     const message =
-      `🛎️ ĐƠN HÀNG MỚI - ${orderCode}\n` +
-      `👤 Khách: ${dto.customer_name}\n` +
-      `📞 SĐT: ${dto.customer_phone}\n` +
-      `📍 Địa chỉ: ${fullAddress}\n` +
-      `───────────────\n` +
-      `${itemsList}\n` +
-      `───────────────\n` +
-      `💰 Tổng: ${total.toLocaleString('vi-VN')}đ\n` +
+      `🔔 Y NÙ QUÁN - ĐƠN HÀNG MỚI 🔔\n\n` +
+      `📌 Mã đơn: ${orderCode}\n` +
+      `👤 Khách hàng: ${dto.customer_name}\n` +
+      `📞 Số điện thoại: ${dto.customer_phone}\n` +
+      `📍 Địa chỉ: ${fullAddress}\n\n` +
+      `📋 CHI TIẾT ĐƠN HÀNG:\n` +
+      `${itemsList}\n\n` +
+      `💰 TỔNG CỘNG: ${total.toLocaleString('vi-VN')}đ\n` +
       (dto.note ? `📝 Ghi chú: ${dto.note}` : '')
 
     await axios.post(
@@ -237,25 +237,21 @@ export class OrderService {
       const itemsList = items
         .map(
           (i) =>
-            `• ${i.name} x${i.quantity} — ${(i.price * i.quantity).toLocaleString('vi-VN')}đ`,
+            `• ${i.name} (x${i.quantity}) — ${(i.price * i.quantity).toLocaleString('vi-VN')}đ`,
         )
         .join('\n')
 
       // 4. Định dạng tin nhắn gửi cho khách hàng
       const message =
-        `🌸 Cảm ơn bạn đã đặt hàng tại YNuQuan Healthy!\n\n` +
-        `Đơn hàng của bạn đã được tiếp nhận thành công.\n` +
-        `🏷️ Mã đơn: ${order.order_code}\n` +
-        `👤 Người nhận: ${order.customer_name}\n` +
-        `📞 SĐT: ${order.customer_phone}\n` +
-        `📍 Địa chỉ giao: ${address}\n` +
-        `───────────────────\n` +
-        `${itemsList}\n` +
-        `───────────────────\n` +
-        `💰 Tổng tiền thanh toán: ${order.total_price.toLocaleString('vi-VN')}đ\n` +
-        (note ? `📝 Ghi chú: ${note}\n` : '') +
-        `\n` +
-        `Nhân viên cửa hàng sẽ liên hệ xác nhận cuộc gọi và giao hàng cho bạn trong thời gian sớm nhất!`
+        `Ý Nù Quán xác nhận đơn hàng của Anh/Chị ${order.customer_name} ạ\n\n` +
+        `📌 THÔNG TIN ĐƠN HÀNG:\n` +
+        `• Mã đơn hàng: ${order.order_code}\n` +
+        `• Số điện thoại: ${order.customer_phone}\n` +
+        `• Địa chỉ giao hàng: ${address}\n\n` +
+        `📋 CHI TIẾT MÓN ĂN:\n` +
+        `${itemsList}\n\n` +
+        `💰 TỔNG TIỀN: ${order.total_price.toLocaleString('vi-VN')}đ\n` +
+        (note ? `📝 Ghi chú: ${note}` : '')
 
       // 5. Gửi tin nhắn
       await this.sendMessengerMessage(senderPsid, message)
