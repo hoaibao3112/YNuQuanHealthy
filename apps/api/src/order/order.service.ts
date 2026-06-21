@@ -75,7 +75,7 @@ export class OrderService {
     )
 
     // 5. Trả về link mở Messenger cho khách
-    const messengerUrl = `https://m.me/${process.env.FB_PAGE_ID}?ref=w2567308--${orderCode}`
+    const messengerUrl = `https://m.me/${process.env.FB_PAGE_ID}?ref=2567308--${orderCode}`
 
     return {
       success: true,
@@ -336,7 +336,9 @@ export class OrderService {
     }
 
     let orderCode = ref
-    if (ref.startsWith('w2567308--')) {
+    if (ref.startsWith('2567308--')) {
+      orderCode = ref.replace('2567308--', '')
+    } else if (ref.startsWith('w2567308--')) {
       orderCode = ref.replace('w2567308--', '')
     } else if (ref.startsWith('order--')) {
       orderCode = ref.replace('order--', '')
