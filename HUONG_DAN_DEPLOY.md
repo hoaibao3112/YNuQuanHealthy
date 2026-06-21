@@ -106,19 +106,13 @@ Sau khi Vercel build xong, bạn sẽ có đường link trang Web bán hàng ch
 
 ---
 
-### Bước 4: Cấu hình Webhook trên Facebook Developer Portal
-Sau khi deploy Backend thành công lên Render và có đường dẫn (ví dụ: `https://ynuquan-api.onrender.com`), bạn thực hiện liên kết chatbot:
-1.  Truy cập trang [Facebook Developers](https://developers.facebook.com/) -> Chọn Ứng dụng Facebook của bạn.
-2.  Ở thanh bên trái, vào mục **Messenger** -> **Cài đặt API Messenger** (hoặc mục **Webhooks**).
-3.  Tìm phần **Xác cấu hình Webhook (Configure Webhooks)** và bấm nút **Thiết lập/Chỉnh sửa (Edit)**:
-    *   **Callback URL**: Điền đường dẫn của bạn kèm theo `/orders/fb-webhook` (Ví dụ: `https://ynuquan-api.onrender.com/orders/fb-webhook`)
-    *   **Verify Token**: Điền chính xác chuỗi mã xác minh đã cấu hình ở bước Render bên trên (`YNuQuanSecureVerifyToken123`).
-    *   Bấm **Xác minh và lưu**.
-4.  Tại mục **Trường đăng ký Webhook (Subscription Fields)** ngay phía dưới, bấm **Quản lý** và tích chọn chọn các trường sau:
-    *   `messages`
-    *   `messaging_postbacks`
-    *   `messaging_referrals`
-    *   Bấm **Lưu** để hoàn tất.
+### Bước 4: Tích hợp với Botcake.io (Thay thế cho Webhook Facebook thủ công)
+Vì hệ thống sử dụng Botcake.io làm chatbot (để bỏ qua thủ tục xét duyệt ứng dụng với Facebook), bạn **KHÔNG cần** tạo ứng dụng Facebook Developer hay cấu hình Webhook thủ công trên Developer Portal nữa.
+
+Thay vào đó, bạn chỉ cần cấu hình Botcake liên kết với server API theo tài liệu hướng dẫn tại [BOTCAKE_GUIDE.md](file:///d:/freelancer/YNuQuan/BOTCAKE_GUIDE.md):
+1. Tạo công cụ **Messenger Ref URL** trên Botcake.
+2. Cấu hình kịch bản **Opt-in Message** tự động gọi **JSON API Webhook** trỏ về: `https://<ten-mien-render-cua-ban>/orders/botcake-webhook` với tham số `ref={{order_code}}`.
+3. Bật nút **"Bắt đầu"** ở Cấu hình chung của Botcake và bấm **Làm mới quyền** để đồng bộ với Facebook.
 
 ---
 

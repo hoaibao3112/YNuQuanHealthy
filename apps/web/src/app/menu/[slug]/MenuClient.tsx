@@ -149,13 +149,11 @@ export default function MenuClient({
                     {/* Ảnh món (Bo góc, 4/3 aspect ratio) */}
                     <div className="relative aspect-[4/3] w-full rounded-md sm:rounded-[12px] overflow-hidden bg-[#FAFAFA] shadow-xs">
                       {item.image_url ? (
-                        <Image
+                        <img
                           src={item.image_url}
                           alt={item.name}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-500"
-                          sizes="(max-width: 768px) 25vw, 33vw"
-                          priority={index < 8}
+                          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+                          loading="lazy"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-xl select-none bg-[#FAFAFA]">
@@ -324,13 +322,10 @@ export default function MenuClient({
               {/* Hình ảnh */}
               <div className="relative aspect-video w-full bg-slate-50">
                 {selectedItem.image_url ? (
-                  <Image
+                  <img
                     src={selectedItem.image_url}
                     alt={selectedItem.name}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 640px) 100vw, 480px"
-                    priority
+                    className="w-full h-full object-contain"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-5xl bg-slate-100 select-none">
