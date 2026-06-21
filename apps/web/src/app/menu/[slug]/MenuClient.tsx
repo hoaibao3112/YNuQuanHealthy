@@ -320,15 +320,15 @@ export default function MenuClient({
             {/* Cuộn nội dung */}
             <div className="flex-1 overflow-y-auto pb-6">
               {/* Hình ảnh */}
-              <div className="relative aspect-video w-full bg-slate-50">
+              <div className="w-full bg-slate-50 flex justify-center items-center overflow-hidden">
                 {selectedItem.image_url ? (
                   <img
                     src={selectedItem.image_url}
                     alt={selectedItem.name}
-                    className="w-full h-full object-contain"
+                    className="w-full h-auto max-h-[360px] object-contain"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-5xl bg-slate-100 select-none">
+                  <div className="aspect-video w-full flex items-center justify-center text-5xl bg-slate-100 select-none">
                     🥗
                   </div>
                 )}
