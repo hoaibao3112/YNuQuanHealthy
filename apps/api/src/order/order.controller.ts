@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Query, HttpCode } from '@nestjs/common'
+import { Controller, Post, Body, Get, Query, HttpCode, Headers } from '@nestjs/common'
 import { OrderService } from './order.service'
 import { CreateOrderDto } from './dto/create-order.dto'
 
@@ -27,9 +27,20 @@ export class OrderController {
     return 'EVENT_RECEIVED'
   }
 
+  @Get('botcake-debug')
+  getBotcakeDebug() {
+    return this.orderService.getBotcakeLogs()
+  }
+
   @Post('botcake-webhook')
   @HttpCode(200)
-  async handleBotcakeWebhook(@Body() body: { ref: string }) {
+  async handleBotcakeWebhook(
+    @Body() body: any,
+    @Headers() headers: any,
+    @Query() query: any,
+  ) {
+    this.orderService.logBotcakeWebhook(body, headers, query)
     return this.orderService.handleBotcakeWebhook(body)
   }
 }
+

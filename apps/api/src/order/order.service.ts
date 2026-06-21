@@ -7,6 +7,25 @@ import axios from 'axios'
 export class OrderService {
   constructor(private readonly supabase: SupabaseService) {}
 
+  private static webhookLogs: any[] = []
+
+  logBotcakeWebhook(body: any, headers: any, query: any) {
+    OrderService.webhookLogs.push({
+      timestamp: new Date().toISOString(),
+      body,
+      headers,
+      query,
+    })
+    if (OrderService.webhookLogs.length > 50) {
+      OrderService.webhookLogs.shift()
+    }
+  }
+
+  getBotcakeLogs() {
+    return OrderService.webhookLogs
+  }
+
+
   async createOrder(dto: CreateOrderDto) {
     // 1. Validate items không rỗng
     if (!dto.items || dto.items.length === 0) {
