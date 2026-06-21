@@ -75,7 +75,7 @@ export class OrderService {
     )
 
     // 5. Trả về link mở Messenger cho khách
-    const messengerUrl = `https://m.me/${process.env.FB_PAGE_ID}?ref=2567308--order_code=${orderCode}`
+    const messengerUrl = `https://m.me/${process.env.FB_PAGE_ID}?ref=2567308--${orderCode}`
 
     return {
       success: true,
