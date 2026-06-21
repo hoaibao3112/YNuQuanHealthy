@@ -75,7 +75,7 @@ export class OrderService {
     )
 
     // 5. Trả về link mở Messenger cho khách
-    const messengerUrl = `https://m.me/${process.env.FB_PAGE_ID}?ref=2567308--order--${orderCode}`
+    const messengerUrl = `https://m.me/${process.env.FB_PAGE_ID}?ref=2567308--order=${orderCode}`
 
     return {
       success: true,
@@ -220,13 +220,21 @@ export class OrderService {
         }
 
         if (ref) {
-          let orderCode = ''
-          if (ref.startsWith('order--')) {
-            orderCode = ref.replace('order--', '')
-          } else if (ref.startsWith('order_')) {
-            orderCode = ref.replace('order_', '')
-          } else if (ref.startsWith('order-')) {
-            orderCode = ref.replace('order-', '')
+          let orderCode = ref
+          if (orderCode.startsWith('2567308--')) {
+            orderCode = orderCode.replace('2567308--', '')
+          } else if (orderCode.startsWith('w2567308--')) {
+            orderCode = orderCode.replace('w2567308--', '')
+          }
+
+          if (orderCode.startsWith('order=')) {
+            orderCode = orderCode.replace('order=', '')
+          } else if (orderCode.startsWith('order--')) {
+            orderCode = orderCode.replace('order--', '')
+          } else if (orderCode.startsWith('order_')) {
+            orderCode = orderCode.replace('order_', '')
+          } else if (orderCode.startsWith('order-')) {
+            orderCode = orderCode.replace('order-', '')
           }
 
           if (orderCode) {
@@ -336,16 +344,20 @@ export class OrderService {
     }
 
     let orderCode = ref
-    if (ref.startsWith('2567308--')) {
-      orderCode = ref.replace('2567308--', '')
-    } else if (ref.startsWith('w2567308--')) {
-      orderCode = ref.replace('w2567308--', '')
-    } else if (ref.startsWith('order--')) {
-      orderCode = ref.replace('order--', '')
-    } else if (ref.startsWith('order_')) {
-      orderCode = ref.replace('order_', '')
-    } else if (ref.startsWith('order-')) {
-      orderCode = ref.replace('order-', '')
+    if (orderCode.startsWith('2567308--')) {
+      orderCode = orderCode.replace('2567308--', '')
+    } else if (orderCode.startsWith('w2567308--')) {
+      orderCode = orderCode.replace('w2567308--', '')
+    }
+
+    if (orderCode.startsWith('order=')) {
+      orderCode = orderCode.replace('order=', '')
+    } else if (orderCode.startsWith('order--')) {
+      orderCode = orderCode.replace('order--', '')
+    } else if (orderCode.startsWith('order_')) {
+      orderCode = orderCode.replace('order_', '')
+    } else if (orderCode.startsWith('order-')) {
+      orderCode = orderCode.replace('order-', '')
     }
 
     // 1. Truy vấn đơn hàng từ Supabase

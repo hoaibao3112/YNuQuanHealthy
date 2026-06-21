@@ -83,7 +83,7 @@ describe('OrderService', () => {
     expect(result.order_code).toBeDefined()
     expect(result.total_price).toBe(90000)
     expect(result.messenger_url).toContain('test-fb-page-id')
-    expect(result.messenger_url).toContain(`ref=2567308--order--${result.order_code}`)
+    expect(result.messenger_url).toContain(`ref=2567308--order=${result.order_code}`)
 
     // Chờ một khoảng thời gian ngắn để các tác vụ bất đồng bộ fire-and-forget chạy xong
     await new Promise((resolve) => setTimeout(resolve, 50))
@@ -211,6 +211,31 @@ describe('OrderService', () => {
         }),
         expect.any(Object),
       )
+    })
+
+    it('[HAPPY PATH] handleWebhookPayload xử lý thành công tin nhắn chứa referral với định dạng order=', async () => {
+      mockSupabaseClient.single.mockResolvedValue({ data: mockOrder, error: null })
+
+      const payload = {
+        object: 'page',
+        entry: [
+          {
+            messaging: [
+              {
+                sender: { id: 'user-psid-1' },
+                referral: {
+                  ref: '2567308--order=DH123456',
+                },
+              },
+            ],
+          },
+        ],
+      }
+
+      await service.handleWebhookPayload(payload)
+
+      expect(mockSupabaseClient.from).toHaveBeenCalledWith('orders')
+      expect(mockSupabaseClient.eq).toHaveBeenCalledWith('order_code', 'DH123456')
     })
 
     it('[HAPPY PATH] handleWebhookPayload xử lý thành công postback chứa referral', async () => {
@@ -344,6 +369,24 @@ describe('OrderService', () => {
       mockSupabaseClient.single.mockResolvedValue({ data: mockOrder, error: null })
 
       const result = await service.handleBotcakeWebhook({ ref: 'order_DH123456' })
+
+      expect(mockSupabaseClient.eq).toHaveBeenCalledWith('order_code', 'DH123456')
+      expect(result.content.messages[0].text).toContain('DH123456')
+    })
+
+    it('[HAPPY PATH] handleBotcakeWebhook xử lý khi ref có tiền tố order=', async () => {
+      mockSupabaseClient.single.mockResolvedValue({ data: mockOrder, error: null })
+
+      const result = await service.handleBotcakeWebhook({ ref: 'order=DH123456' })
+
+      expect(mockSupabaseClient.eq).toHaveBeenCalledWith('order_code', 'DH123456')
+      expect(result.content.messages[0].text).toContain('DH123456')
+    })
+
+    it('[HAPPY PATH] handleBotcakeWebhook xử lý khi ref có tiền tố tool ID và order=', async () => {
+      mockSupabaseClient.single.mockResolvedValue({ data: mockOrder, error: null })
+
+      const result = await service.handleBotcakeWebhook({ ref: '2567308--order=DH123456' })
 
       expect(mockSupabaseClient.eq).toHaveBeenCalledWith('order_code', 'DH123456')
       expect(result.content.messages[0].text).toContain('DH123456')
