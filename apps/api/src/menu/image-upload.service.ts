@@ -1,6 +1,15 @@
 import { Injectable, BadRequestException } from '@nestjs/common'
 import { SupabaseService } from '../supabase/supabase.service'
-import * as sharp from 'sharp'
+import sharp from 'sharp'
+
+export interface MulterFile {
+  fieldname: string
+  originalname: string
+  encoding: string
+  mimetype: string
+  size: number
+  buffer: Buffer
+}
 
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 const MAX_SIZE_BYTES = 5 * 1024 * 1024 // 5MB
@@ -11,7 +20,7 @@ export class ImageUploadService {
   constructor(private readonly supabase: SupabaseService) {}
 
   async uploadMenuImage(
-    file: Express.Multer.File,
+    file: MulterFile,
     shopSlug: string,
   ): Promise<{ url: string; originalSize: number; compressedSize: number }> {
     // --- Validate ---

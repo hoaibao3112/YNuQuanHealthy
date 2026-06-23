@@ -10,7 +10,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express'
 import { memoryStorage } from 'multer'
 import { ApiKeyGuard } from '../common/guards/api-key.guard'
-import { ImageUploadService } from './image-upload.service'
+import { ImageUploadService, MulterFile } from './image-upload.service'
 
 @Controller('menu')
 export class ImageUploadController {
@@ -31,7 +31,7 @@ export class ImageUploadController {
     }),
   )
   async uploadImage(
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: MulterFile,
     @Body('shopSlug') shopSlug: string,
   ) {
     if (!shopSlug) throw new BadRequestException('Thiếu shopSlug trong body')
