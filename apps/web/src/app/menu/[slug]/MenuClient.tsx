@@ -461,7 +461,8 @@ export default function MenuClient({
                     alt={selectedItem.name}
                     fill
                     sizes="(max-width: 640px) 100vw, 480px"
-                    className="object-contain"
+                    className="object-cover"
+                    priority
                   />
                 ) : (
                   <div className="aspect-video w-full flex items-center justify-center text-5xl bg-slate-100 select-none">
