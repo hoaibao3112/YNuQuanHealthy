@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards, Query, Headers } from '@nestjs/common'
+import { Controller, Get, Post, Put, Patch, Delete, Param, Body, UseGuards, Query, Headers } from '@nestjs/common'
 import { MenuService } from './menu.service'
 import { ApiKeyGuard } from '../common/guards/api-key.guard'
 
@@ -29,6 +29,12 @@ export class MenuController {
   @UseGuards(ApiKeyGuard)
   updateItem(@Param('id') id: string, @Body() body: any) {
     return this.menuService.updateItem(id, body)
+  }
+
+  @Patch('reorder')
+  @UseGuards(ApiKeyGuard)
+  reorderItems(@Body() body: { shop_slug: string; order: { id: string; sort_order: number }[] }) {
+    return this.menuService.reorderItems(body.shop_slug, body.order)
   }
 
   @Delete(':id')

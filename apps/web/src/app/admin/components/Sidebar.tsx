@@ -4,9 +4,22 @@ interface SidebarProps {
   isSidebarOpen: boolean
   setIsSidebarOpen: (open: boolean) => void
   onLogout: () => void
+  activeTab: 'products' | 'reorder'
+  setActiveTab: (tab: 'products' | 'reorder') => void
 }
 
-export default function Sidebar({ isSidebarOpen, setIsSidebarOpen, onLogout }: SidebarProps) {
+export default function Sidebar({
+  isSidebarOpen,
+  setIsSidebarOpen,
+  onLogout,
+  activeTab,
+  setActiveTab,
+}: SidebarProps) {
+  const handleNav = (tab: 'products' | 'reorder') => {
+    setActiveTab(tab)
+    setIsSidebarOpen(false)
+  }
+
   return (
     <aside className={`transform fixed inset-y-0 left-0 w-64 bg-blue-50/95 lg:bg-blue-50/40 border-r border-slate-200 flex flex-col justify-between p-6 z-50 transition-transform duration-300 lg:static lg:translate-x-0 ${
       isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
@@ -19,7 +32,7 @@ export default function Sidebar({ isSidebarOpen, setIsSidebarOpen, onLogout }: S
             <p className="text-xs text-slate-500 font-medium mt-0.5">Quản lý kho vận</p>
           </div>
           {/* Nút đóng Sidebar trên Mobile */}
-          <button 
+          <button
             onClick={() => setIsSidebarOpen(false)}
             className="lg:hidden p-1.5 rounded-lg text-slate-500 hover:bg-slate-200 transition-colors"
           >
@@ -31,15 +44,36 @@ export default function Sidebar({ isSidebarOpen, setIsSidebarOpen, onLogout }: S
 
         {/* Navigation Menu */}
         <nav className="flex flex-col gap-2">
-          <button 
-            onClick={() => setIsSidebarOpen(false)}
-            className="flex items-center gap-3 bg-sky-500 text-white rounded-xl px-4 py-3 text-sm font-semibold shadow-md shadow-sky-500/10 hover:bg-sky-600 transition-all duration-200 text-left w-full cursor-pointer"
+          {/* Tab Sản phẩm */}
+          <button
+            onClick={() => handleNav('products')}
+            className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200 text-left w-full cursor-pointer ${
+              activeTab === 'products'
+                ? 'bg-sky-500 text-white shadow-md shadow-sky-500/10 hover:bg-sky-600'
+                : 'bg-white/60 text-slate-600 hover:bg-white/90 border border-slate-200'
+            }`}
           >
             {/* Product Box Icon */}
-            <svg className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="size-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
             </svg>
             <span>Sản phẩm</span>
+          </button>
+
+          {/* Tab Sắp xếp menu */}
+          <button
+            onClick={() => handleNav('reorder')}
+            className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200 text-left w-full cursor-pointer ${
+              activeTab === 'reorder'
+                ? 'bg-sky-500 text-white shadow-md shadow-sky-500/10 hover:bg-sky-600'
+                : 'bg-white/60 text-slate-600 hover:bg-white/90 border border-slate-200'
+            }`}
+          >
+            {/* Reorder / Drag icon */}
+            <svg className="size-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+            </svg>
+            <span>Sắp xếp menu</span>
           </button>
         </nav>
       </div>
@@ -53,7 +87,7 @@ export default function Sidebar({ isSidebarOpen, setIsSidebarOpen, onLogout }: S
           </svg>
           <span>Hỗ trợ kỹ thuật</span>
         </button>
-        
+
         <button
           onClick={onLogout}
           className="flex items-center gap-2 text-red-500 hover:text-red-700 transition-colors duration-200 text-sm font-semibold pl-4 cursor-pointer"

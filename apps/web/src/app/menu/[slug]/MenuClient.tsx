@@ -1,38 +1,105 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { MenuItem } from './page'
 import OrderPanel from './OrderPanel'
 import Image from 'next/image'
+import { createClient } from '@/lib/supabase-client'
 
 export interface CartItem extends MenuItem {
   quantity: number
 }
 
 export default function MenuClient({
-  items,
+  items: initialItems,
   slug,
 }: {
   items: MenuItem[]
   slug: string
 }) {
+  const supabase = createClient()
+
+  // State cục bộ — khởi tạo từ SSR props, cập nhật qua Realtime / polling
+  const [items, setItems] = useState<MenuItem[]>(initialItems)
   const [cart, setCart] = useState<CartItem[]>([])
   const [activeCategory, setActiveCategory] = useState<string>('Món ăn healthy')
   const [activeSubCategory, setActiveSubCategory] = useState<string>('all')
   const [showOrderPanel, setShowOrderPanel] = useState(false)
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null)
 
+  // Ref cho debounce timer
+  const refetchTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Ref cho fallback polling
+  const pollingTimer = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  // Hàm tải lại danh sách món từ API (dùng chung cho Realtime + polling)
+  const refetchItems = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/menu/${slug}`)
+      if (!res.ok) return
+      const data: MenuItem[] = await res.json()
+      setItems(data)
+    } catch (err) {
+      console.error('[MenuClient] Lỗi refetch:', err)
+    }
+  }, [slug])
+
+  // Debounce refetch để gom nhiều event Realtime liên tiếp thành 1 lần gọi
+  const scheduleRefetch = useCallback(() => {
+    if (refetchTimer.current) clearTimeout(refetchTimer.current)
+    refetchTimer.current = setTimeout(() => {
+      refetchItems()
+    }, 400) // debounce 400ms
+  }, [refetchItems])
+
+  useEffect(() => {
+    // Subscribe Realtime cho cả menu_items và categories
+    const channel = supabase
+      .channel(`menu-realtime-${slug}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'menu_items',
+          filter: `shop_slug=eq.${slug}`,
+        },
+        () => scheduleRefetch(),
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'categories',
+          filter: `shop_slug=eq.${slug}`,
+        },
+        () => scheduleRefetch(),
+      )
+      .subscribe()
+
+    // Fallback polling 60s — bù khi event UPDATE bị RLS chặn (is_active false)
+    pollingTimer.current = setInterval(refetchItems, 60_000)
+
+    return () => {
+      supabase.removeChannel(channel)
+      if (refetchTimer.current) clearTimeout(refetchTimer.current)
+      if (pollingTimer.current) clearInterval(pollingTimer.current)
+    }
+  }, [slug, scheduleRefetch, refetchItems])
+
+  // Sắp xếp categories theo sort_order của item đầu tiên trong nhóm
+  // (đại diện cho sort_order của category được gán từ bảng categories)
   const categories = useMemo(() => {
-    const order = ['Món ăn healthy', 'Món ăn vặt', 'Nước uống']
-    const cats = Array.from(new Set(items.map((i) => i.category)))
-    return cats.sort((a, b) => {
-      const idxA = order.indexOf(a)
-      const idxB = order.indexOf(b)
-      if (idxA === -1 && idxB === -1) return a.localeCompare(b)
-      if (idxA === -1) return 1
-      if (idxB === -1) return -1
-      return idxA - idxB
+    const seen = new Set<string>()
+    const ordered: string[] = []
+    items.forEach(item => {
+      if (!seen.has(item.category)) {
+        seen.add(item.category)
+        ordered.push(item.category)
+      }
     })
+    return ordered
   }, [items])
 
   const subCategories = useMemo(() => {
@@ -56,17 +123,7 @@ export default function MenuClient({
   }, [items, activeCategory])
 
   const filtered = useMemo(() => {
-    const categoryOrder = ['Món ăn healthy', 'Món ăn vặt', 'Nước uống']
-    const sorted = [...items].sort((a, b) => {
-      const idxA = categoryOrder.indexOf(a.category)
-      const idxB = categoryOrder.indexOf(b.category)
-      if (idxA === -1 && idxB === -1) return a.category.localeCompare(b.category)
-      if (idxA === -1) return 1
-      if (idxB === -1) return -1
-      return idxA - idxB
-    })
-
-    let result = sorted
+    let result = items
     if (activeCategory !== 'all') {
       result = result.filter((i) => i.category === activeCategory)
 

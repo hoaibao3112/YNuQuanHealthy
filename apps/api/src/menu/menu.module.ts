@@ -7,5 +7,6 @@ import { ImageUploadService } from './image-upload.service'
 @Module({
   controllers: [MenuController, ImageUploadController],
   providers: [MenuService, ImageUploadService],
+  exports: [MenuService],
 })
 export class MenuModule {}
