@@ -24,7 +24,7 @@ export async function bootstrapNest() {
   const allowedOrigin = process.env.FRONTEND_URL || 'http://localhost:3000'
   app.enableCors({
     origin: allowedOrigin,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'x-api-key'],
   })
 
@@ -46,7 +46,7 @@ if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
     )
     app.enableCors({
       origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'x-api-key'],
     })
     await app.listen(port)
