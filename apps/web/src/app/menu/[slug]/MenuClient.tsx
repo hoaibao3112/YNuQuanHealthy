@@ -102,8 +102,12 @@ export default function MenuClient({
     return ordered
   }, [items])
 
+  // Chỉ hiện subcategory filter khi đang ở nhóm "Đồ ăn vặt"
+  const SUB_CATEGORY_ENABLED = 'Đồ ăn vặt'
+
   const subCategories = useMemo(() => {
     if (activeCategory === 'all') return []
+    if (activeCategory !== SUB_CATEGORY_ENABLED) return []
     const itemsInCat = items.filter((i) => i.category === activeCategory)
     const subs = itemsInCat
       .map((i) => i.sub_category?.trim())
@@ -118,6 +122,7 @@ export default function MenuClient({
 
   const hasNullSubCategory = useMemo(() => {
     if (activeCategory === 'all') return false
+    if (activeCategory !== SUB_CATEGORY_ENABLED) return false
     const itemsInCat = items.filter((i) => i.category === activeCategory)
     return itemsInCat.some((i) => !i.sub_category)
   }, [items, activeCategory])
