@@ -1,6 +1,7 @@
 import { Injectable, BadRequestException } from '@nestjs/common'
 import { SupabaseService } from '../supabase/supabase.service'
-import sharp from 'sharp'
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const sharp: (input: Buffer) => import('sharp').Sharp = require('sharp')
 
 export interface MulterFile {
   fieldname: string
