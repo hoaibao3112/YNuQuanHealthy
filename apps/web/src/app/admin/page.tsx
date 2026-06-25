@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState, useMemo, useRef } from 'react'
 import { useRouter } from 'next/navigation'
@@ -354,8 +354,7 @@ export default function AdminPage() {
   }
 
   const handleDeleteCategoryFromFilter = async (catName: string) => {
-    if (!confirm(`Xóa nhóm "${catName}"?
-Chỉ xóa được nếu không còn món nào trong nhóm này.`)) return
+    if (!confirm(`Xóa nhóm "${catName}"?\nChỉ xóa được nếu không còn món nào trong nhóm này.`)) return
     const cat = categoriesList.find(c => c.name === catName)
     if (!cat) return
     try {
@@ -371,6 +370,32 @@ Chỉ xóa được nếu không còn món nào trong nhóm này.`)) return
       showMsg(`Đã xóa nhóm "${catName}"`)
     } catch {
       showMsg('Lỗi kết nối khi xóa nhóm!', 'error')
+    }
+  }
+
+  const handleDeleteSubCategory = async (category: string, subCategory: string) => {
+    if (!confirm(`Xóa nhóm phụ "${subCategory}"?\nTất cả sản phẩm trong nhóm phụ này sẽ không còn được gắn nhóm phụ đó nữa.`)) return
+    try {
+      const targetItems = items.filter(
+        item => item.category === category && item.sub_category === subCategory
+      )
+      await Promise.all(
+        targetItems.map(item =>
+          fetch(`/api/admin/menu/${item.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...item, sub_category: null }),
+          })
+        )
+      )
+      await fetchItems(shopSlug)
+      if (form.sub_category === subCategory) {
+        setForm(prev => ({ ...prev, sub_category: '', customSubCategory: '' }))
+      }
+      showMsg(`Đã xóa nhóm phụ "${subCategory}" (${targetItems.length} sản phẩm đã được cập nhật)`)
+    } catch (err) {
+      showMsg('Lỗi khi xóa nhóm phụ!', 'error')
+      console.error(err)
     }
   }
 
@@ -657,7 +682,7 @@ Chỉ xóa được nếu không còn món nào trong nhóm này.`)) return
 
       {/* RESPONSIVE MODAL DIALOG */}
       {isModalOpen && (
-        <ProductFormModal
+      <ProductFormModal
           form={form}
           setForm={setForm}
           editId={editId}
@@ -669,6 +694,7 @@ Chỉ xóa được nếu không còn món nào trong nhóm này.`)) return
           onImageUpload={handleImageUpload}
           onRemoveImage={handleRemoveImage}
           onCancel={handleCancel}
+          onDeleteSubCategory={handleDeleteSubCategory}
         />
       )}
     </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 
 type FormState = {
@@ -27,6 +27,7 @@ interface ProductFormModalProps {
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void
   onRemoveImage: () => void
   onCancel: () => void
+  onDeleteSubCategory: (category: string, subCategory: string) => Promise<void>
 }
 
 export default function ProductFormModal({
@@ -41,7 +42,29 @@ export default function ProductFormModal({
   onImageUpload,
   onRemoveImage,
   onCancel,
+  onDeleteSubCategory,
 }: ProductFormModalProps) {
+  const [isSubDropdownOpen, setIsSubDropdownOpen] = useState(false)
+  const subDropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (subDropdownRef.current && !subDropdownRef.current.contains(e.target as Node)) {
+        setIsSubDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  // Reset dropdown khi category thay đổi
+  useEffect(() => {
+    setIsSubDropdownOpen(false)
+  }, [form.category])
+
+  const currentSubs = dynamicSubCategoriesMap[form.category] || []
+  const selectedSubLabel = form.sub_category === '' ? 'Không có' : form.sub_category === 'custom' ? (form.customSubCategory || 'Nhập mới...') : form.sub_category
+
   return (
     <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 transition-all duration-300">
       {/* Modal Container: Bottom sheet trên Mobile, Standard Modal trên Desktop */}
@@ -147,19 +170,81 @@ export default function ProductFormModal({
               Nhóm phụ (Loại món)
             </label>
             {dynamicCategories.includes(form.category) ? (
-              <select
-                value={form.sub_category}
-                onChange={e => setForm({ ...form, sub_category: e.target.value, customSubCategory: '' })}
-                className="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 cursor-pointer"
-              >
-                <option value="">Không có</option>
-                {(dynamicSubCategoriesMap[form.category] || []).map(sub => (
-                  <option key={sub} value={sub}>
-                    {sub}
-                  </option>
-                ))}
-                <option value="custom">➕ Thêm nhóm phụ khác...</option>
-              </select>
+              // Custom dropdown có nút xóa từng nhóm phụ
+              <div className="relative" ref={subDropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsSubDropdownOpen(prev => !prev)}
+                  className="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 cursor-pointer flex items-center justify-between gap-2 text-left"
+                >
+                  <span className="truncate">{selectedSubLabel}</span>
+                  <span className="text-slate-400 text-xs flex-shrink-0">▼</span>
+                </button>
+
+                {isSubDropdownOpen && (
+                  <div className="absolute top-full left-0 right-0 mt-1.5 z-[60] bg-white border border-slate-200 rounded-xl shadow-lg py-1.5 overflow-hidden max-h-56 overflow-y-auto">
+                    {/* Option Không có */}
+                    <button
+                      type="button"
+                      onClick={() => { setForm({ ...form, sub_category: '', customSubCategory: '' }); setIsSubDropdownOpen(false) }}
+                      className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-colors ${
+                        form.sub_category === '' ? 'bg-blue-50 text-blue-600' : 'text-slate-700 hover:bg-slate-50'
+                      }`}
+                    >
+                      Không có
+                    </button>
+
+                    {/* Danh sách nhóm phụ hiện có */}
+                    {currentSubs.length > 0 && (
+                      <div className="border-t border-slate-100 mt-1 pt-1">
+                        {currentSubs.map(sub => (
+                          <div
+                            key={sub}
+                            className={`flex items-center justify-between px-2 py-1 group transition-colors ${
+                              form.sub_category === sub ? 'bg-blue-50' : 'hover:bg-slate-50'
+                            }`}
+                          >
+                            <button
+                              type="button"
+                              onClick={() => { setForm({ ...form, sub_category: sub, customSubCategory: '' }); setIsSubDropdownOpen(false) }}
+                              className={`flex-1 text-left px-2 py-1.5 text-sm font-medium truncate transition-colors ${
+                                form.sub_category === sub ? 'text-blue-600' : 'text-slate-700'
+                              }`}
+                            >
+                              {sub}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={async e => {
+                                e.stopPropagation()
+                                setIsSubDropdownOpen(false)
+                                await onDeleteSubCategory(form.category, sub)
+                              }}
+                              className="size-7 flex items-center justify-center rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100"
+                              title={`Xóa nhóm phụ "${sub}"`}
+                            >
+                              <svg className="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Option Thêm nhóm phụ mới */}
+                    <div className="border-t border-slate-100 mt-1 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => { setForm({ ...form, sub_category: 'custom', customSubCategory: '' }); setIsSubDropdownOpen(false) }}
+                        className="w-full text-left px-4 py-2.5 text-sm font-medium text-blue-500 hover:bg-blue-50 transition-colors"
+                      >
+                        ➕ Thêm nhóm phụ khác...
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : (
               // Nếu danh mục chính là custom, cho phép nhập text tự do
               <input
