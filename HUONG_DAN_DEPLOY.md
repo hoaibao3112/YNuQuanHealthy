@@ -1,4 +1,4 @@
-# Hướng Dẫn Vận Hành & Deploy Hệ Thống YNuQuan
+﻿# Hướng Dẫn Vận Hành & Deploy Hệ Thống YNuQuan
 ### (Cấu hình chuẩn: Web Vercel - API Render - Database Supabase - Giữ thức bằng UptimeRobot)
 
 Tài liệu này ghi chép lại chi tiết luồng chạy thực tế và các bước thiết lập hệ thống YNuQuan trên các nền tảng đám mây để hệ thống hoạt động **miễn phí, ổn định 24/7 và tải nhanh tức thì**.
@@ -65,12 +65,12 @@ Hệ thống được vận hành theo mô hình phân tách tối ưu:
     *   `SUPABASE_KEY` = *(Lấy từ cài đặt Supabase của bạn)*
     *   `DATABASE_URL` = *(Lấy ở mục Connection String trên Supabase - dạng postgresql://...)*
     *   `DIRECT_URL` = *(Lấy ở mục Connection String trên Supabase)*
-    *   `TELEGRAM_BOT_TOKEN` = `8927387445:AAGBEDim8x9bhD_5CahZvXGoLSAwkXpUL5I`
-    *   `TELEGRAM_CHAT_ID` = `-5456690098`
-    *   `FB_PAGE_ACCESS_TOKEN` = `EAAenaz5LGEUBR5DNbkxHZATKhZC4FWpehRFDszOaiCmh3dyaVCFYlLHB8QiNTp0uZCWUOaS8sNQOiZAGwIvv44ICIriqIxv4QxWPz0qJWDOZB4T3WNqxUP8c0D72kcHEd6Gqn5NIEfpqZBNNSsi4ZAFaYjmvBBMjtrQM3TyeR5mVxLEKUPUVjBBP4d91OcQxwj2UXyOQQZDZD`
-    *   `FB_PAGE_ID` = `1200246289829421`
-    *   `FB_ADMIN_PSID` = `35273366672310754`
-    *   `FB_VERIFY_TOKEN` = `YNuQuanSecureVerifyToken123` (Mật khẩu tự chọn để xác minh Webhook với Facebook)
+    *   `TELEGRAM_BOT_TOKEN` = *(Lấy từ BotFather trên Telegram)*
+    *   `TELEGRAM_CHAT_ID` = *(ID nhóm Telegram nhận thông báo đơn hàng)*
+    *   `FB_PAGE_ACCESS_TOKEN` = *(Lấy từ Facebook Developer Portal)*
+    *   `FB_PAGE_ID` = *(ID của Facebook Page)*
+    *   `FB_ADMIN_PSID` = *(PSID của tài khoản admin nhận tin nhắn)*
+    *   `FB_VERIFY_TOKEN` = *(Chuỗi bất kỳ tự đặt, dùng để xác minh Webhook với Facebook)*
 5.  Ấn **Create Web Service**. Đợi vài phút để Render biên dịch và khởi chạy thành công. Copy đường dẫn ứng dụng do Render cấp, ví dụ: `https://ynuquan-api.onrender.com`.
 
 ---

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Playball, Dancing_Script, Be_Vietnam_Pro } from 'next/font/google'
+import Script from 'next/script'
 import './globals.css'
 
 const playball = Playball({
@@ -33,10 +34,28 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const gaId = process.env.NEXT_PUBLIC_GA_ID || 'G-Z2WSR3V7NQ'
+
   return (
     <html lang="vi" className={`${playball.variable} ${dancingScript.variable} ${beVietnamPro.variable}`}>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        {children}
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', '${gaId}');
+          `}
+        </Script>
+      </body>
     </html>
   )
 }
+
 

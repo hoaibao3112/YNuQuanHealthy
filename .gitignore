@@ -17,8 +17,11 @@ build/
 .env.test
 .env.production
 
+# TypeScript build cache
+*.tsbuildinfo
+
 # Logs
-logs
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -37,7 +40,9 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
-*.tsbuildinfo
+
+# Product images (lưu trên Supabase Storage, không cần commit vào git)
+product-images/
 
 # Image backups
 apps/web/public/images/_backup/
