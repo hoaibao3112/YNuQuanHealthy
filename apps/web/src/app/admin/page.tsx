@@ -9,6 +9,8 @@ import ProductTable from './components/ProductTable'
 import ProductFormModal from './components/ProductFormModal'
 import CategoryManager from './components/CategoryManager'
 import ProductReorderPanel from './components/ProductReorderPanel'
+import PromotionTable, { Promotion } from './components/PromotionTable'
+import PromotionFormModal, { PromotionFormState } from './components/PromotionFormModal'
 
 type MenuItem = {
   id: string
@@ -50,6 +52,19 @@ const emptyForm = {
   image_url: '',
 }
 
+const emptyPromoForm: PromotionFormState = {
+  name: '',
+  code: '',
+  description: '',
+  discount_type: 'percent',
+  discount_value: '',
+  max_discount: '',
+  min_order_value: '',
+  start_date: '',
+  end_date: '',
+  is_active: true,
+}
+
 export default function AdminPage() {
   const router = useRouter()
   const supabase = createClient()
@@ -61,7 +76,7 @@ export default function AdminPage() {
   const [editId, setEditId] = useState<string | null>(null)
 
   // State điều hướng tab
-  const [activeTab, setActiveTab] = useState<'products' | 'reorder'>('products')
+  const [activeTab, setActiveTab] = useState<'products' | 'reorder' | 'promotions'>('products')
   // Category được chọn trong view Sắp xếp menu
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
 
@@ -85,6 +100,17 @@ export default function AdminPage() {
 
   // Danh sách categories thực tế
   const [categoriesList, setCategoriesList] = useState<Category[]>([])
+
+  // ==================== STATE: KHUYẾN MÃI ====================
+  const [promotions, setPromotions] = useState<Promotion[]>([])
+  const [promoForm, setPromoForm] = useState<PromotionFormState>(emptyPromoForm)
+  const [promoEditId, setPromoEditId] = useState<string | null>(null)
+  const [isPromoModalOpen, setIsPromoModalOpen] = useState(false)
+  const [promoLoading, setPromoLoading] = useState(false)
+  const [promoSearchTerm, setPromoSearchTerm] = useState('')
+  const [promoStatusFilter, setPromoStatusFilter] = useState<'all' | 'active' | 'inactive'>('all')
+  const [promoCurrentPage, setPromoCurrentPage] = useState(1)
+  const promoItemsPerPage = 6
 
   // Track nhóm phụ đã bị xóa thủ công (key: "category::subCategory")
   const [deletedSubCategoriesSet, setDeletedSubCategoriesSet] = useState<Set<string>>(() => {
@@ -151,6 +177,140 @@ export default function AdminPage() {
     }
   }
 
+  // ==================== HÀM: KHUYẾN MÃI ====================
+  // Lưu ý: backend chưa có bảng "promotions" riêng, nên trước mắt dữ liệu
+  // khuyến mãi được lưu tại localStorage theo từng shop_slug (promotions_<shop_slug>).
+  // Khi backend bổ sung module Promotions (NestJS) + bảng Supabase, chỉ cần
+  // thay các hàm bên dưới bằng fetch('/api/admin/promotions/...') — proxy
+  // /api/admin/[...path] đã sẵn sàng forward request lên NestJS.
+  const promoStorageKey = (slug: string) => `promotions_${slug}`
+
+  const fetchPromotions = (currentShopSlug = shopSlug) => {
+    if (!currentShopSlug || typeof window === 'undefined') return
+    try {
+      const saved = localStorage.getItem(promoStorageKey(currentShopSlug))
+      setPromotions(saved ? (JSON.parse(saved) as Promotion[]) : [])
+    } catch (err) {
+      console.error('Lỗi khi tải danh sách khuyến mãi:', err)
+      setPromotions([])
+    }
+  }
+
+  const persistPromotions = (currentShopSlug: string, list: Promotion[]) => {
+    setPromotions(list)
+    try {
+      localStorage.setItem(promoStorageKey(currentShopSlug), JSON.stringify(list))
+    } catch (err) {
+      console.error('Lỗi khi lưu khuyến mãi:', err)
+    }
+  }
+
+  const handlePromoSubmit = () => {
+    if (!promoForm.name.trim() || !promoForm.discount_value || !promoForm.start_date || !promoForm.end_date) {
+      showMsg('Vui lòng điền đủ tên, giá trị giảm, ngày bắt đầu và kết thúc!', 'error')
+      return
+    }
+    if (new Date(promoForm.end_date) < new Date(promoForm.start_date)) {
+      showMsg('Ngày kết thúc phải sau ngày bắt đầu!', 'error')
+      return
+    }
+
+    setPromoLoading(true)
+
+    const payload: Promotion = {
+      id: promoEditId || (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : String(Date.now())),
+      shop_slug: shopSlug,
+      name: promoForm.name.trim(),
+      code: promoForm.code.trim().toUpperCase(),
+      description: promoForm.description.trim(),
+      discount_type: promoForm.discount_type,
+      discount_value: Number(promoForm.discount_value) || 0,
+      max_discount: promoForm.discount_type === 'percent' && promoForm.max_discount ? Number(promoForm.max_discount) : null,
+      min_order_value: promoForm.min_order_value ? Number(promoForm.min_order_value) : null,
+      start_date: promoForm.start_date,
+      end_date: promoForm.end_date,
+      is_active: promoForm.is_active,
+      created_at: new Date().toISOString(),
+    }
+
+    let nextList: Promotion[]
+    if (promoEditId) {
+      nextList = promotions.map(p => (p.id === promoEditId ? { ...p, ...payload, created_at: p.created_at } : p))
+      showMsg('Cập nhật khuyến mãi thành công!')
+    } else {
+      nextList = [payload, ...promotions]
+      showMsg('Thêm khuyến mãi mới thành công!')
+    }
+
+    persistPromotions(shopSlug, nextList)
+    setPromoForm(emptyPromoForm)
+    setPromoEditId(null)
+    setIsPromoModalOpen(false)
+    setPromoLoading(false)
+  }
+
+  const handlePromoEdit = (item: Promotion) => {
+    setPromoEditId(item.id)
+    setPromoForm({
+      name: item.name,
+      code: item.code || '',
+      description: item.description || '',
+      discount_type: item.discount_type,
+      discount_value: String(item.discount_value),
+      max_discount: item.max_discount ? String(item.max_discount) : '',
+      min_order_value: item.min_order_value ? String(item.min_order_value) : '',
+      start_date: item.start_date,
+      end_date: item.end_date,
+      is_active: item.is_active,
+    })
+    setIsPromoModalOpen(true)
+  }
+
+  const handlePromoDelete = (id: string) => {
+    if (!confirm('Bạn có chắc chắn muốn xóa chương trình khuyến mãi này?')) return
+    persistPromotions(shopSlug, promotions.filter(p => p.id !== id))
+    showMsg('Đã xóa khuyến mãi thành công!')
+  }
+
+  const handlePromoToggleActive = (item: Promotion) => {
+    persistPromotions(shopSlug, promotions.map(p => (p.id === item.id ? { ...p, is_active: !p.is_active } : p)))
+    showMsg(item.is_active ? `Đã tạm dừng "${item.name}"` : `Đã kích hoạt "${item.name}"`)
+  }
+
+  const handleOpenAddPromoModal = () => {
+    setPromoForm(emptyPromoForm)
+    setPromoEditId(null)
+    setIsPromoModalOpen(true)
+  }
+
+  const handlePromoCancel = () => {
+    setPromoForm(emptyPromoForm)
+    setPromoEditId(null)
+    setIsPromoModalOpen(false)
+  }
+
+  // Lọc và Tìm kiếm khuyến mãi
+  const filteredPromotions = useMemo(() => {
+    return promotions.filter(p => {
+      const term = promoSearchTerm.toLowerCase()
+      const matchesSearch = p.name.toLowerCase().includes(term) || (p.code || '').toLowerCase().includes(term)
+      const matchesStatus =
+        promoStatusFilter === 'all' ||
+        (promoStatusFilter === 'active' && p.is_active) ||
+        (promoStatusFilter === 'inactive' && !p.is_active)
+      return matchesSearch && matchesStatus
+    })
+  }, [promotions, promoSearchTerm, promoStatusFilter])
+
+  const paginatedPromotions = useMemo(() => {
+    const start = (promoCurrentPage - 1) * promoItemsPerPage
+    return filteredPromotions.slice(start, start + promoItemsPerPage)
+  }, [filteredPromotions, promoCurrentPage])
+
+  const promoTotalPages = Math.ceil(filteredPromotions.length / promoItemsPerPage) || 1
+  const promoStartIndex = (promoCurrentPage - 1) * promoItemsPerPage + 1
+  const promoEndIndex = Math.min(promoCurrentPage * promoItemsPerPage, filteredPromotions.length)
+
   useEffect(() => {
     const loadConfig = async () => {
       try {
@@ -171,6 +331,7 @@ export default function AdminPage() {
     if (configLoaded && shopSlug) {
       fetchItems(shopSlug)
       fetchCategories(shopSlug)
+      fetchPromotions(shopSlug)
     }
   }, [configLoaded, shopSlug])
 
@@ -367,7 +528,7 @@ export default function AdminPage() {
   }
 
   const handleDeleteCategoryFromFilter = async (catName: string) => {
-    if (!confirm(`Xóa nhóm "${catName}"?\nChỉ xóa được nếu không còn món nào trong nhóm này.`)) return
+    if (!confirm(`Xóa nhóm "${catName}"?\nChỉ xóa được nếu không còn món nào trong nhóm này.`)) return
     const cat = categoriesList.find(c => c.name === catName)
     if (!cat) return
     try {
@@ -380,7 +541,7 @@ export default function AdminPage() {
       if (categoryFilter === catName) setCategoryFilter('all')
       await fetchCategories(shopSlug)
       await fetchItems(shopSlug)
-      showMsg(`Đã xóa nhóm "${catName}"`)
+      showMsg(`Đã xóa nhóm "${catName}"`)
     } catch {
       showMsg('Lỗi kết nối khi xóa nhóm!', 'error')
     }
@@ -480,6 +641,13 @@ export default function AdminPage() {
   const startIndex = (currentPage - 1) * itemsPerPage + 1
   const endIndex = Math.min(currentPage * itemsPerPage, filteredItems.length)
 
+  // Cấu hình Header động theo tab đang chọn
+  const headerConfig = {
+    products: { title: 'Quản lý sản phẩm', addButtonLabel: 'Thêm sản phẩm', showAddButton: true, onAdd: handleOpenAddModal },
+    reorder: { title: 'Sắp xếp menu', addButtonLabel: '', showAddButton: false, onAdd: () => {} },
+    promotions: { title: 'Quản lý khuyến mãi', addButtonLabel: 'Tạo khuyến mãi', showAddButton: true, onAdd: handleOpenAddPromoModal },
+  } as const
+
   return (
     <div className="min-h-screen bg-slate-50 flex font-sans relative overflow-x-hidden">
       {/* Backdrop overlay khi Sidebar di động mở */}
@@ -502,7 +670,13 @@ export default function AdminPage() {
       {/* CONTENT AREA (PHẦN BÊN PHẢI) */}
       <div className="flex-1 flex flex-col min-w-0 pb-20 lg:pb-0">
         {/* Header */}
-        <Header onOpenSidebar={() => setIsSidebarOpen(true)} onOpenAddModal={handleOpenAddModal} />
+        <Header
+          onOpenSidebar={() => setIsSidebarOpen(true)}
+          onOpenAddModal={headerConfig[activeTab].onAdd}
+          title={headerConfig[activeTab].title}
+          addButtonLabel={headerConfig[activeTab].addButtonLabel}
+          showAddButton={headerConfig[activeTab].showAddButton}
+        />
 
         {/* Subheader: Tìm kiếm & Filter — chỉ hiện khi ở tab Sản phẩm */}
         {activeTab === 'products' && (
@@ -625,6 +799,62 @@ export default function AdminPage() {
           </>
         )}
 
+        {/* Subheader: Tìm kiếm & Filter — chỉ hiện khi ở tab Khuyến mãi */}
+        {activeTab === 'promotions' && (
+          <>
+            <section className="bg-white border-b border-slate-100 px-4 sm:px-8 py-3.5 flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
+              <div className="relative max-w-md w-full">
+                <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg className="size-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </span>
+                <input
+                  type="text"
+                  placeholder="Tìm theo tên hoặc mã khuyến mãi..."
+                  value={promoSearchTerm}
+                  onChange={e => {
+                    setPromoSearchTerm(e.target.value)
+                    setPromoCurrentPage(1)
+                  }}
+                  className="w-full bg-slate-100/80 focus:bg-white text-sm pl-10 pr-4 py-2.5 rounded-full border border-transparent focus:border-slate-300 focus:outline-none transition-all duration-200 text-slate-800"
+                />
+              </div>
+
+              {/* Toast message */}
+              {msg && (
+                <div className={`text-[10px] sm:text-xs font-bold px-2.5 py-1.5 rounded-lg border shadow-sm w-fit ${
+                  msgType === 'success' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-red-50 text-red-700 border-red-100'
+                }`}>
+                  {msg}
+                </div>
+              )}
+            </section>
+
+            {/* Filter bar: Tabs trạng thái */}
+            <section className="bg-white px-4 sm:px-8 py-2.5 border-b border-slate-200 flex items-center justify-between gap-4">
+              <div className="flex gap-1.5 overflow-x-auto">
+                {(['active', 'inactive', 'all'] as const).map(s => (
+                  <button
+                    key={s}
+                    onClick={() => { setPromoStatusFilter(s); setPromoCurrentPage(1) }}
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all duration-200 flex-shrink-0 ${
+                      promoStatusFilter === s
+                        ? 'bg-blue-50 border-blue-200 text-blue-600'
+                        : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100/50'
+                    }`}
+                  >
+                    {s === 'active' ? 'Đang kích hoạt' : s === 'inactive' ? 'Tạm dừng' : 'Tất cả'}
+                  </button>
+                ))}
+              </div>
+              <div className="text-xs text-slate-500 font-bold hidden sm:block">
+                {filteredPromotions.length} chương trình đang hiển thị
+              </div>
+            </section>
+          </>
+        )}
+
         {/* Main Content Area */}
         <main className="p-4 sm:p-8 flex-1 flex flex-col min-h-0">
           {activeTab === 'products' ? (
@@ -651,7 +881,7 @@ export default function AdminPage() {
                 onDelete={handleDelete}
               />
             </>
-          ) : (
+          ) : activeTab === 'reorder' ? (
             /* View Sắp xếp menu: CategoryManager bên trái, ProductReorderPanel bên phải (Mobile drill-down, Desktop side-by-side) */
             <div className="flex flex-col md:flex-row gap-6 flex-1 min-h-0">
               {/* Cột trái: Quản lý danh mục */}
@@ -684,26 +914,45 @@ export default function AdminPage() {
                 )}
               </div>
             </div>
+          ) : (
+            <>
+              {/* Label hiển thị tổng số khuyến mãi cho Mobile */}
+              <div className="flex justify-between items-center mb-3 sm:hidden px-1">
+                <span className="text-xs text-slate-500 font-bold">{filteredPromotions.length} chương trình đang hiển thị</span>
+              </div>
+              <PromotionTable
+                filteredItems={filteredPromotions}
+                paginatedItems={paginatedPromotions}
+                currentPage={promoCurrentPage}
+                totalPages={promoTotalPages}
+                startIndex={promoStartIndex}
+                endIndex={promoEndIndex}
+                setCurrentPage={setPromoCurrentPage}
+                onEdit={handlePromoEdit}
+                onDelete={handlePromoDelete}
+                onToggleActive={handlePromoToggleActive}
+              />
+            </>
           )}
         </main>
       </div>
 
-      {/* STICKY BOTTOM BUTTON CHO MOBILE (chỉ hiện ở tab Sản phẩm) */}
-      {activeTab === 'products' && (
+      {/* STICKY BOTTOM BUTTON CHO MOBILE (chỉ hiện ở tab Sản phẩm / Khuyến mãi) */}
+      {(activeTab === 'products' || activeTab === 'promotions') && (
         <div className="fixed bottom-0 inset-x-0 bg-white border-t border-slate-200 p-3.5 flex justify-center lg:hidden z-30 shadow-lg">
           <button
-            onClick={handleOpenAddModal}
+            onClick={activeTab === 'products' ? handleOpenAddModal : handleOpenAddPromoModal}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-full font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 shadow-md shadow-blue-600/10 cursor-pointer"
           >
             <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
-            <span>Thêm sản phẩm</span>
+            <span>{activeTab === 'products' ? 'Thêm sản phẩm' : 'Tạo khuyến mãi'}</span>
           </button>
         </div>
       )}
 
-      {/* RESPONSIVE MODAL DIALOG */}
+      {/* RESPONSIVE MODAL DIALOG: SẢN PHẨM */}
       {isModalOpen && (
       <ProductFormModal
           form={form}
@@ -720,9 +969,18 @@ export default function AdminPage() {
           onDeleteSubCategory={handleDeleteSubCategory}
         />
       )}
+
+      {/* RESPONSIVE MODAL DIALOG: KHUYẾN MÃI */}
+      {isPromoModalOpen && (
+        <PromotionFormModal
+          form={promoForm}
+          setForm={setPromoForm}
+          editId={promoEditId}
+          loading={promoLoading}
+          onSubmit={handlePromoSubmit}
+          onCancel={handlePromoCancel}
+        />
+      )}
     </div>
   )
 }
-
-
-

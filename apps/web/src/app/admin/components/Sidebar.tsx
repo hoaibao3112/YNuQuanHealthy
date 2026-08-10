@@ -4,8 +4,8 @@ interface SidebarProps {
   isSidebarOpen: boolean
   setIsSidebarOpen: (open: boolean) => void
   onLogout: () => void
-  activeTab: 'products' | 'reorder'
-  setActiveTab: (tab: 'products' | 'reorder') => void
+  activeTab: 'products' | 'reorder' | 'promotions'
+  setActiveTab: (tab: 'products' | 'reorder' | 'promotions') => void
 }
 
 export default function Sidebar({
@@ -15,7 +15,7 @@ export default function Sidebar({
   activeTab,
   setActiveTab,
 }: SidebarProps) {
-  const handleNav = (tab: 'products' | 'reorder') => {
+  const handleNav = (tab: 'products' | 'reorder' | 'promotions') => {
     setActiveTab(tab)
     setIsSidebarOpen(false)
   }
@@ -74,6 +74,22 @@ export default function Sidebar({
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
             </svg>
             <span>Sắp xếp menu</span>
+          </button>
+
+          {/* Tab Khuyến mãi */}
+          <button
+            onClick={() => handleNav('promotions')}
+            className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200 text-left w-full cursor-pointer ${
+              activeTab === 'promotions'
+                ? 'bg-sky-500 text-white shadow-md shadow-sky-500/10 hover:bg-sky-600'
+                : 'bg-white/60 text-slate-600 hover:bg-white/90 border border-slate-200'
+            }`}
+          >
+            {/* Tag / Discount icon */}
+            <svg className="size-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5.586a2 2 0 011.414.586l7 7a2 2 0 010 2.828l-6.586 6.586a2 2 0 01-2.828 0l-7-7A2 2 0 013 11.586V6a3 3 0 013-3z" />
+            </svg>
+            <span>Khuyến mãi</span>
           </button>
         </nav>
       </div>

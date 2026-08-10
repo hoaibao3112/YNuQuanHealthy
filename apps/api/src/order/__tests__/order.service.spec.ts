@@ -93,7 +93,7 @@ describe('OrderService', () => {
     expect(result.order_code).toBeDefined()
     expect(result.total_price).toBe(90000)
     expect(result.messenger_url).toContain('test-fb-page-id')
-    expect(result.messenger_url).toContain(`ref=2567571--order=${result.order_code}`)
+    expect(result.messenger_url).toContain(`ref=2578106--order=${result.order_code}`)
 
     // Chờ một khoảng thời gian ngắn để các tác vụ bất đồng bộ fire-and-forget chạy xong
     await new Promise((resolve) => setTimeout(resolve, 50))

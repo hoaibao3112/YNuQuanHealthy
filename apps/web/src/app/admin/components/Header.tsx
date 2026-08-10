@@ -3,9 +3,18 @@
 interface HeaderProps {
   onOpenSidebar: () => void
   onOpenAddModal: () => void
+  title?: string
+  addButtonLabel?: string
+  showAddButton?: boolean
 }
 
-export default function Header({ onOpenSidebar, onOpenAddModal }: HeaderProps) {
+export default function Header({
+  onOpenSidebar,
+  onOpenAddModal,
+  title = 'Quản lý sản phẩm',
+  addButtonLabel = 'Thêm sản phẩm',
+  showAddButton = true,
+}: HeaderProps) {
   return (
     <header className="h-20 bg-white border-b border-slate-200 px-4 sm:px-8 flex items-center justify-between gap-4">
       {/* Menu Button + Title */}
@@ -19,22 +28,24 @@ export default function Header({ onOpenSidebar, onOpenAddModal }: HeaderProps) {
             <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
-        <h1 className="text-lg sm:text-xl font-bold text-slate-800 whitespace-nowrap">Quản lý sản phẩm</h1>
+        <h1 className="text-lg sm:text-xl font-bold text-slate-800 whitespace-nowrap">{title}</h1>
       </div>
       
-      {/* Add product button and notifications */}
+      {/* Add button and notifications */}
       <div className="flex items-center gap-3 sm:gap-5">
-        {/* Nút Thêm sản phẩm ẩn trên Mobile, hiển thị từ lg */}
-        <button
-          onClick={onOpenAddModal}
-          className="hidden lg:flex bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-full px-5 py-2.5 items-center gap-2 transition-all duration-200 shadow-md shadow-blue-600/10 cursor-pointer"
-        >
-          {/* Plus Icon */}
-          <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
-          <span>Thêm sản phẩm</span>
-        </button>
+        {/* Nút Thêm ẩn trên Mobile, hiển thị từ lg */}
+        {showAddButton && (
+          <button
+            onClick={onOpenAddModal}
+            className="hidden lg:flex bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-full px-5 py-2.5 items-center gap-2 transition-all duration-200 shadow-md shadow-blue-600/10 cursor-pointer"
+          >
+            {/* Plus Icon */}
+            <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            <span>{addButtonLabel}</span>
+          </button>
+        )}
 
         <div className="hidden lg:block w-px h-6 bg-slate-200"></div>
 
