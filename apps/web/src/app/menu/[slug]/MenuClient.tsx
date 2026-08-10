@@ -179,9 +179,9 @@ export default function MenuClient({
   }
 
   return (
-    <div className="min-h-screen min-h-[100dvh] bg-[#FAFAFA] text-slate-800 flex flex-col">
+    <div className="min-h-screen bg-[#FAFAFA] text-slate-800 flex flex-col">
       {/* Desktop: 2 cột | Mobile: 1 cột */}
-      <div className="flex flex-col lg:flex-row flex-1 min-h-screen min-h-[100dvh]">
+      <div className="flex flex-col lg:flex-row flex-1 min-h-screen">
 
         {/* ===== CỘT TRÁI: MENU ===== */}
         <div className="flex-1 lg:max-w-[65%] flex flex-col">
@@ -267,8 +267,8 @@ export default function MenuClient({
             )}
           </div>
 
-          {/* Grid món ăn (Cố định 4 cột trên mobile, 3 cột trên desktop) */}
-          <div className="flex-1 overflow-y-auto p-1.5 sm:p-6 bg-[#FAFAFA]">
+          {/* Grid món ăn (Cố định 4 cột trên mobile, 3 cột trên desktop, pb-28 để lướt mượt không bị che bởi thanh giỏ hàng) */}
+          <div className="flex-1 p-1.5 sm:p-6 bg-[#FAFAFA] pb-28 sm:pb-32">
             <div className="grid grid-cols-4 md:grid-cols-3 gap-1.5 sm:gap-6">
               {filtered.map((item, index) => {
                 const qty = getQty(item.id)
@@ -358,9 +358,9 @@ export default function MenuClient({
           </div>
 
 
-          {/* Mobile: Thanh giỏ hàng cố định phía dưới (Sticky bottom bar, nền cam, bo góc lớn, đổ bóng trên) */}
+          {/* Mobile: Thanh giỏ hàng cố định phía dưới (Fixed bottom bar, nền cam, bo góc lớn, đổ bóng trên) */}
           {totalQty > 0 && (
-            <div className="lg:hidden sticky bottom-0 p-3 bg-[#FAFAFA]/90 backdrop-blur-md border-t border-[#F3F4F6] z-40">
+            <div className="lg:hidden fixed bottom-0 left-0 right-0 p-3 bg-white/95 backdrop-blur-md border-t border-[#F3F4F6] z-40 shadow-[0_-8px_30px_rgba(0,0,0,0.12)]">
               <div className="h-16 bg-[#F97316] text-white rounded-[20px] flex items-center justify-between px-5 shadow-[0_-4px_20px_rgba(0,0,0,0.12)]">
                 <div className="flex items-center gap-2.5">
                   <div className="relative">
@@ -409,8 +409,14 @@ export default function MenuClient({
 
       {/* Mobile: Order Panel dạng bottom sheet */}
       {showOrderPanel && (
-        <div className="lg:hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex flex-col justify-end">
-          <div className="bg-white rounded-t-[2.5rem] max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
+        <div 
+          className="lg:hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex flex-col justify-end overflow-hidden animate-in fade-in duration-200"
+          onClick={() => setShowOrderPanel(false)}
+        >
+          <div 
+            className="bg-white rounded-t-[2.5rem] max-h-[92vh] flex flex-col shadow-2xl overflow-hidden animate-in slide-in-from-bottom duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex-1 overflow-y-auto">
               <OrderPanel
                 cart={cart}

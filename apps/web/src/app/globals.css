@@ -4,10 +4,14 @@
 
 html {
   font-family: var(--font-be-vietnam), sans-serif;
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
   background-color: #FAFAFA;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
