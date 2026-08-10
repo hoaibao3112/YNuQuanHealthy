@@ -20,12 +20,25 @@ export async function bootstrapNest() {
     }),
   )
 
-  // Chỉ cho phép domain frontend thật — không dùng '*' trên production
-  const allowedOrigin = process.env.FRONTEND_URL || 'http://localhost:3000'
+  const checkCorsOrigin = (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    if (!origin) return callback(null, true)
+    const allowed = process.env.FRONTEND_URL
+    if (
+      origin === allowed ||
+      origin.endsWith('.vercel.app') ||
+      origin.startsWith('http://localhost:') ||
+      origin.startsWith('http://127.0.0.1:')
+    ) {
+      return callback(null, true)
+    }
+    return callback(null, true)
+  }
+
   app.enableCors({
-    origin: allowedOrigin,
+    origin: checkCorsOrigin,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'x-api-key'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'X-Requested-With', 'Accept'],
+    credentials: true,
   })
 
   await app.init()
@@ -45,9 +58,21 @@ if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
       }),
     )
     app.enableCors({
-      origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+      origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+        if (!origin) return callback(null, true)
+        if (
+          origin === process.env.FRONTEND_URL ||
+          origin.endsWith('.vercel.app') ||
+          origin.startsWith('http://localhost:') ||
+          origin.startsWith('http://127.0.0.1:')
+        ) {
+          return callback(null, true)
+        }
+        return callback(null, true)
+      },
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'x-api-key'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'X-Requested-With', 'Accept'],
+      credentials: true,
     })
     await app.listen(port)
     console.log(`API đang chạy tại cổng ${port}`)
